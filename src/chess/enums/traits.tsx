@@ -1,5 +1,6 @@
 enum traits {
-    ATTACK_ALL,
+    IGNORE_BLOCKED_ATTACK,
+    IGNORE_BLOCKED_MOVE,
     STATIONARY_ATTACK,
 }
 

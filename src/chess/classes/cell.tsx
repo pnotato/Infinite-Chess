@@ -19,6 +19,10 @@ class cell {
     setPiece(piece : chesspiece | null) {
         this.piece = piece;
     }
+
+    getPiece() {
+        return this.piece;
+    }
 }
 
 export default cell;

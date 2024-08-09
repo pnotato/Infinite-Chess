@@ -1,8 +1,6 @@
 // Response in format:
 
-//Name: <Piece Name (str)>
 //Emoji: <Emoji (str)>
-//Health: <Health (int)>
 //Movement: <Movement pattern; fixed, line, diagonal, any, custom>
 //Attack: <Attack pattern; fixed, line, diagonal, any, custom>
 //Traits: <Traits (str)>

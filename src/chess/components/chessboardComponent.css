@@ -52,10 +52,6 @@
     user-select: none;
   }
   
-  .piece {
-    transition: transform 0.5s ease;
-  }
-  
   .highlight-circle {
     position: absolute;
     width: 20px;
@@ -72,3 +68,17 @@
     border-radius: 10%;
   }
   
+  .cell-popup {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+    transform: translateX(-50%);
+    top: -30px; /* Adjust as necessary */
+    left: 50%;
+    white-space: nowrap;
+    font-size: 12px;
+}

@@ -1,12 +1,12 @@
-import './App.css';
-import ChessboardComponent from './chess/components/chessboardComponent';
+import React, { useState, useEffect } from 'react';
+import Lobby from './lobby';
 
 function App() {
-  return (
-    <>
-      <ChessboardComponent />
-    </>
-  );
+    return (
+        <div>
+          <Lobby />
+        </div>
+    );
 }
 
 export default App;

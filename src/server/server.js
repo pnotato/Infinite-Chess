@@ -21,61 +21,61 @@ app.use(cors({
     allowedHeaders: ['Content-Type'],
 }));
 
+// Add a new listener for fetching rooms and creating rooms
 io.on('connection', (socket) => {
     console.log('a user connected:', socket.id);
 
-    socket.on('joinRoom', ({ roomCode, username }) => {
-        socket.join(roomCode);
-    
-        if (!rooms[roomCode]) {
-            rooms[roomCode] = {
-                players: [],
-                board: null,
-            };
+    socket.on('getRooms', () => {
+        const availableRooms = Object.keys(rooms);
+        socket.emit('roomsList', availableRooms);
+    });
 
-            
-        }
-        io.to(roomCode).emit('newGame', { roomCode });
+    socket.on('createRoom', ({ username }) => {
+        const roomCode = `room-${Math.floor(Math.random() * 10000)}`;
+        rooms[roomCode] = {
+            players: [],
+            board: null,
+        };
+        socket.join(roomCode);
         rooms[roomCode].players.push({ id: socket.id, username });
         io.to(roomCode).emit('joinedRoom', { roomCode, players: rooms[roomCode].players });
-    
-        console.log(`${username} joined room ${roomCode}`);
+        io.emit('roomsList', Object.keys(rooms)); // Update the list of rooms for everyone
+        console.log(`${username} created and joined room ${roomCode}`);
+    });
+
+    socket.on('joinRoom', ({ roomCode, username }) => {
+        if (rooms[roomCode] && rooms[roomCode].players.length < 4) {
+            socket.join(roomCode);
+            io.to(roomCode).emit('newGame', { roomCode });
+            rooms[roomCode].players.push({ id: socket.id, username });
+            io.to(roomCode).emit('joinedRoom', { roomCode, players: rooms[roomCode].players });
+            console.log(`${username} joined room ${roomCode}`);
+        }
     });
 
     socket.on('updateBoard', ({ roomCode, newBoard }) => {
         console.log('received board:', newBoard);
-        // Update the game state
         const room = rooms[roomCode];
         if (room) {
             room.board = newBoard;
-
-            // Broadcast the updated board state to all players in the room
-            //console.log('updating board:', board);
             io.to(roomCode).emit('updateBoard', { newBoard });
         }
     });
 
-    socket.on('makeMove', ({ roomCode, move }) => {
-        // Update the game state
-        const room = rooms[roomCode];
-        if (room) {
-            // Apply the move to the board state
-            // Assuming `move` contains from and to positions and handles the update
-            const { from, to } = move;
-
-            const piece = room.board.getPiece(from.x, from.y);
-            if (piece) {
-                piece.move(to.x, to.y);
-            }
-
-            // Broadcast the updated board state to all players in the room
-            io.to(roomCode).emit('updateBoard', { board: room.board });
-        }
-    });
-
     socket.on('disconnect', () => {
-        console.log('user disconnected:', socket.id);
-        // Handle player disconnection, update room state accordingly
+        console.log('a user disconnected:', socket.id);
+        for (const roomCode in rooms) {
+            const room = rooms[roomCode];
+            const playerIndex = room.players.findIndex(player => player.id === socket.id);
+            if (playerIndex !== -1) {
+                room.players.splice(playerIndex, 1);
+                io.to(roomCode).emit('playerLeft', { players: room.players });
+                if (room.players.length === 0) {
+                    delete rooms[roomCode];
+                    io.emit('roomsList', Object.keys(rooms)); // Update the list of rooms for everyone
+                }
+            }
+        }
     });
 });
 

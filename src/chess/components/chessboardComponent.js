@@ -170,7 +170,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
     };
 
     const handlePieceNameChange = async () => {
-        if (selectedPiece && pieceNameInput) {
+        if (selectedPiece && pieceNameInput && isYourTurn()) {
             const response = await getResponse(pieceNameInput);
 
             const data = JSON.parse(response);
@@ -190,6 +190,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
             const newBoard = board;
             socket.emit('updateBoard', { roomCode, newBoard });
+            socket.emit('changeTurn', { roomCode });
 
             setValidAttacks(selectedPiece.validAttacks || []);
             setValidMoves(selectedPiece.validMoves || []);

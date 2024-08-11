@@ -92,7 +92,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
             socket.emit('playerLeft', { roomCode });
             socket.off('updateBoard');
         };
-    }, [roomCode]);
+    }, [roomCode, id, username]);
 
     const rehydrateBoard = (boardData) => {
         const hydratedBoard = Object.assign(new chessboard(), boardData);
@@ -124,7 +124,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 socket.emit('updateBoard', { roomCode, newBoard });
                 if (attacked) {
                     setGameOver(newBoard.isGameOver);
-                    if (newBoard.isGameOver == true) {
+                    if (newBoard.isGameOver === true) {
                         socket.emit('gameOver', { roomCode, winner: color });
                         console.log("Game Over");
                     }

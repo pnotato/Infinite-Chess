@@ -1,5 +1,5 @@
 import ChessboardComponent from "./chessboardComponent";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 function PlayPage() {
     let roomCode = sessionStorage.getItem('roomCode');

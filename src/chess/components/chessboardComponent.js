@@ -209,48 +209,88 @@ const ChessboardComponent = ({ roomCode, username }) => {
                         transposedBoard.slice().reverse().map((row, rowIndex) => (
                             <div key={rowIndex} className="row">
                                 <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
-                                {row.map((cell, colIndex) => (
-                                    <div
-                                        key={`${colIndex}-${rowIndex}`}
-                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
-                                        onClick={() => handleCellClick(cell)}
-                                        onMouseEnter={() => handleMouseEnter(cell)}
-                                        onMouseLeave={handleMouseLeave}
-                                    >
-                                        <PieceComponent piece={cell.piece} />
-                                        {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
-                                        {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
-                                        {hoveredCell === cell && cell.piece && (
-                                            <div className="cell-popup">
-                                                {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                {color === colors.WHITE ?
+                                    row.map((cell, colIndex) => (
+                                        <div
+                                            key={`${colIndex}-${rowIndex}`}
+                                            className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                            onClick={() => handleCellClick(cell)}
+                                            onMouseEnter={() => handleMouseEnter(cell)}
+                                            onMouseLeave={handleMouseLeave}
+                                        >
+                                            <PieceComponent piece={cell.piece} />
+                                            {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                            {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                            {hoveredCell === cell && cell.piece && (
+                                                <div className="cell-popup">
+                                                    {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                    :
+                                    row.slice().reverse().map((cell, colIndex) => (
+                                        <div
+                                            key={`${colIndex}-${rowIndex}`}
+                                            className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                            onClick={() => handleCellClick(cell)}
+                                            onMouseEnter={() => handleMouseEnter(cell)}
+                                            onMouseLeave={handleMouseLeave}
+                                        >
+                                            <PieceComponent piece={cell.piece} />
+                                            {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                            {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                            {hoveredCell === cell && cell.piece && (
+                                                <div className="cell-popup">
+                                                    {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
                             </div>
                         ))
                         :
                         transposedBoard.map((row, rowIndex) => (
                             <div key={rowIndex} className="row">
                                 <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
-                                {row.map((cell, colIndex) => (
-                                    <div
-                                        key={`${colIndex}-${rowIndex}`}
-                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
-                                        onClick={() => handleCellClick(cell)}
-                                        onMouseEnter={() => handleMouseEnter(cell)}
-                                        onMouseLeave={handleMouseLeave}
-                                    >
-                                        <PieceComponent piece={cell.piece} />
-                                        {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
-                                        {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
-                                        {hoveredCell === cell && cell.piece && (
-                                            <div className="cell-popup">
-                                                {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                {color === colors.WHITE ?
+                                    row.map((cell, colIndex) => (
+                                        <div
+                                            key={`${colIndex}-${rowIndex}`}
+                                            className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                            onClick={() => handleCellClick(cell)}
+                                            onMouseEnter={() => handleMouseEnter(cell)}
+                                            onMouseLeave={handleMouseLeave}
+                                        >
+                                            <PieceComponent piece={cell.piece} />
+                                            {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                            {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                            {hoveredCell === cell && cell.piece && (
+                                                <div className="cell-popup">
+                                                    {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                    :
+                                    row.slice().reverse().map((cell, colIndex) => (
+                                        <div
+                                            key={`${colIndex}-${rowIndex}`}
+                                            className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                            onClick={() => handleCellClick(cell)}
+                                            onMouseEnter={() => handleMouseEnter(cell)}
+                                            onMouseLeave={handleMouseLeave}
+                                        >
+                                            <PieceComponent piece={cell.piece} />
+                                            {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                            {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                            {hoveredCell === cell && cell.piece && (
+                                                <div className="cell-popup">
+                                                    {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
                             </div>
                         ))
                     }

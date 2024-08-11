@@ -18,8 +18,10 @@ class chesspiece {
     validMoves: { x: number, y: number }[];
     validAttacks: { x: number, y: number }[];
 
+    isKing: boolean;
+
     constructor(basic: { color: colors, position: { x: number, y: number }},
-        custom: { name: string, emoji: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }) {
+        custom: { name: string, emoji: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }, isKing: boolean = false) {
 
         if(!basic || !custom) {
             return;
@@ -27,6 +29,8 @@ class chesspiece {
 
         this.color = basic.color;
         this.position = basic.position;
+
+        this.isKing = isKing;
 
         this.name = custom.name;
         this.emoji = custom.emoji;
@@ -137,6 +141,10 @@ class chesspiece {
 
     destroy(board: chessboard) {
         board.setPiece(null, this.position.x, this.position.y);
+        console.log(`${this.color} ${this.name} destroyed!`);
+        if (this.isKing) {
+            board.gameOver(this.color);
+        }
     }
 
     move(x: number, y: number, board: chessboard) {

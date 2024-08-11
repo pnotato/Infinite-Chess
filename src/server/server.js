@@ -64,6 +64,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('gameOver', ({ roomCode, winner }) => {
+        io.to(roomCode).emit('gameOver', { winner });
+    });
+
     socket.on('changeTurn', ({ roomCode }) => {
         io.to(roomCode).emit('changeTurn');
     });

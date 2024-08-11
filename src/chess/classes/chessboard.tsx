@@ -5,6 +5,8 @@ import info from "./constants/pieces.js";
 
 class chessboard {
     cells: cell[][];
+    isGameOver: boolean = false;
+    winner: colors | null = null;
 
     constructor() {
         this.cells = Array.from({ length: 8 }, (_, i) =>
@@ -28,6 +30,12 @@ class chessboard {
         return cell ? cell.getPiece() : null;
     }
 
+    gameOver(color: colors) {
+        console.log(`Game over! ${color} loses!`);
+        this.isGameOver = true;
+        this.winner = color === colors.WHITE ? colors.BLACK : colors.WHITE;
+    }
+
      standardSetup() {
         // White pieces
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 0, y: 0 }},
@@ -39,7 +47,7 @@ class chessboard {
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 3, y: 0 }},
             info['queen']), 3, 0);
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 4, y: 0 }},
-            info['king']), 4, 0);
+            info['king'], true), 4, 0);
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 5, y: 0 }},
             info['bishop']), 5, 0);
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 6, y: 0 }},
@@ -62,7 +70,7 @@ class chessboard {
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 3, y: 7 }},
             info['queen']), 3, 7);
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 4, y: 7 }},
-            info['king']), 4, 7);
+            info['king'], true), 4, 7);
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 5, y: 7 }},
             info['bishop']), 5, 7);
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 6, y: 7 }},

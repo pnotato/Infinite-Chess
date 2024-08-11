@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'https://infinite-chess.netlify.app/', // Client origin
+        origin: '*', // Client origin
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type'],
     }
@@ -16,13 +16,15 @@ const io = new Server(server, {
 let rooms = {}; // Store game states per room
 
 app.use(cors({
-    origin: 'https://infinite-chess.netlify.app/', // Replace with the origin of your front-end
+    origin: '*', // Replace with the origin of your front-end
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
 
 // Add a new listener for fetching rooms and creating rooms
 io.on('connection', (socket) => {
+    console.log('a user connected');
+
     socket.on('getRooms', () => {
         socket.emit('roomsList', rooms);
     });

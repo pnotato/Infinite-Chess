@@ -8,7 +8,7 @@ import PieceComponent from './pieceComponent';
 import getResponse from '../helper-funcs/getResponse.tsx';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3000');
+const socket = io('http://3.149.237.145:3000');
 
 const ChessboardComponent = ({ roomCode, username }) => {
     const [board, setBoard] = useState(null);
@@ -35,6 +35,9 @@ const ChessboardComponent = ({ roomCode, username }) => {
         socket.on('newGame', ({ turn }) => {
             setVotedRematch(false);
             setGameOver(false);
+            setWinner(null);
+            setCurrentTurn(colors.WHITE);
+            setNumVotes(0);
             if (turn === id) {
                 setColor(prevColor => {
                     return colors.WHITE;
@@ -226,7 +229,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                 <li key={`${user.username} ${index}`}>{user.username}</li>
                             ))}
                         </ul>
-                        {color !== null && currentTurn !== null && (
+                        {color !== null && currentTurn !== null && !gameOver && (
                             <h1>{color === currentTurn ? "Your Turn" : "Opponent's Turn"}</h1>
                         )}
                     </div>

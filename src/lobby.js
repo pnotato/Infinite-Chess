@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import ChessboardComponent from './chess/components/chessboardComponent';
 import './lobby.css';
 
-const socket = io('http://localhost:3000');
+const socket = io('http://3.149.237.145:3000');
 
 function Lobby() {
     const [rooms, setRooms] = useState([]);  // List of open rooms

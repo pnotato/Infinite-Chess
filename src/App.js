@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Lobby from './lobby';
 import PlayPage from './chess/components/playPage';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';

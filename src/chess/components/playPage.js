@@ -1,13 +1,9 @@
 import ChessboardComponent from "./chessboardComponent";
 import { useEffect, useState } from "react";
 
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3000');
-
 function PlayPage() {
-    const [roomCode, setRoomCode] = useState(sessionStorage.getItem('roomCode'));
-    const [username, setUsername] = useState(sessionStorage.getItem('username'));
+    let roomCode = sessionStorage.getItem('roomCode');
+    let username = sessionStorage.getItem('username');
 
     useEffect(() => {
         sessionStorage.removeItem('roomCode');

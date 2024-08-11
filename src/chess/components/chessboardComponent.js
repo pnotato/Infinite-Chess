@@ -24,8 +24,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
     const [winner, setWinner] = useState(null);
     const [votedRematch, setVotedRematch] = useState(false);
     const [numVotes, setNumVotes] = useState(0);
-
-    let id = null;
+    const [id, setId] = useState(null);
 
     useEffect(() => {
         socket.emit('getID', {});
@@ -57,7 +56,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
         });
 
         socket.on('getID', ({ playerID }) => {
-            id = playerID;
+            setId(playerID);
         });
 
         socket.on('updateBoard', ({ newBoard }) => {

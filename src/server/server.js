@@ -23,11 +23,8 @@ app.use(cors({
 
 // Add a new listener for fetching rooms and creating rooms
 io.on('connection', (socket) => {
-    console.log('a user connected:', socket.id);
-
     socket.on('getRooms', () => {
-        const availableRooms = Object.keys(rooms);
-        socket.emit('roomsList', availableRooms);
+        socket.emit('roomsList', rooms);
     });
 
     socket.on('createRoom', ({ username }) => {
@@ -36,25 +33,28 @@ io.on('connection', (socket) => {
             players: [],
             board: null,
         };
-        socket.join(roomCode);
-        rooms[roomCode].players.push({ id: socket.id, username });
-        io.to(roomCode).emit('joinedRoom', { roomCode, players: rooms[roomCode].players });
-        io.emit('roomsList', Object.keys(rooms)); // Update the list of rooms for everyone
-        console.log(`${username} created and joined room ${roomCode}`);
+
+        io.to(socket.id).emit('roomCreated', { roomCode });
+        io.emit('roomsList', rooms);
     });
 
     socket.on('joinRoom', ({ roomCode, username }) => {
-        if (rooms[roomCode] && rooms[roomCode].players.length < 4) {
+        if (rooms[roomCode] && rooms[roomCode].players.length <= 2) {
             socket.join(roomCode);
-            io.to(roomCode).emit('newGame', { roomCode });
             rooms[roomCode].players.push({ id: socket.id, username });
-            io.to(roomCode).emit('joinedRoom', { roomCode, players: rooms[roomCode].players });
-            console.log(`${username} joined room ${roomCode}`);
+ 
+            io.emit('roomsList', rooms);
+            io.to(roomCode).emit('joinedRoom', { room: rooms[roomCode] });
+        }
+    });
+
+    socket.on('loadedRoom', ({ roomCode }) => {
+        if (rooms[roomCode] && rooms[roomCode].players.length >= 2) {
+            io.to(roomCode).emit('newGame');
         }
     });
 
     socket.on('updateBoard', ({ roomCode, newBoard }) => {
-        console.log('received board:', newBoard);
         const room = rooms[roomCode];
         if (room) {
             room.board = newBoard;
@@ -62,17 +62,25 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('playerLeft', ({ roomCode }) => {
+        console.log('player left:', roomCode);
+        const room = rooms[roomCode];
+        if (room) {
+            room.players = room.players.filter(player => player.id !== socket.id);
+            io.to(roomCode).emit('updateRoom', { room });
+        }
+    });
+
     socket.on('disconnect', () => {
-        console.log('a user disconnected:', socket.id);
         for (const roomCode in rooms) {
             const room = rooms[roomCode];
             const playerIndex = room.players.findIndex(player => player.id === socket.id);
             if (playerIndex !== -1) {
                 room.players.splice(playerIndex, 1);
-                io.to(roomCode).emit('playerLeft', { players: room.players });
+                io.to(roomCode).emit('updateRoom', { room });
                 if (room.players.length === 0) {
                     delete rooms[roomCode];
-                    io.emit('roomsList', Object.keys(rooms)); // Update the list of rooms for everyone
+                    io.emit('roomsList', Object.keys(rooms));
                 }
             }
         }

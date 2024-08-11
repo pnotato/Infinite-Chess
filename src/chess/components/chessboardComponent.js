@@ -10,7 +10,7 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3000');
 
-const ChessboardComponent = ({ roomCode }) => {
+const ChessboardComponent = ({ roomCode, username }) => {
     const [board, setBoard] = useState(null);
     const [selectedPiece, setSelectedPiece] = useState(null);
     const [validMoves, setValidMoves] = useState([]);
@@ -19,10 +19,13 @@ const ChessboardComponent = ({ roomCode }) => {
 
     const [pieceNameInput, setPieceNameInput] = useState("");
 
-    useEffect(() => {
-        socket.emit('joinRoom', { roomCode, username: 'Player1' });
+    const [roomInfo, setRoomInfo] = useState(null);
 
-        socket.on('newGame', ({ roomCode }) => {
+    useEffect(() => {
+        socket.emit('joinRoom', { roomCode, username });
+        socket.emit('loadedRoom', { roomCode });
+
+        socket.on('newGame', () => {
             const newBoard = new chessboard();
             newBoard.standardSetup();
             setBoard(newBoard);
@@ -34,10 +37,21 @@ const ChessboardComponent = ({ roomCode }) => {
             setBoard(hydratedBoard);
         });
 
+        socket.on('joinedRoom', ({ room }) => {
+            setRoomInfo(room);
+            console.log(room);
+        });
+
+        socket.on('updateRoom', ({ room }) => {
+            setRoomInfo(room);
+        });
+
         return () => {
+            console.log('leaving room:', roomCode);
+            socket.emit('playerLeft', { roomCode });
             socket.off('updateBoard');
         };
-    }, []);
+    }, [roomCode]);
 
     const rehydrateBoard = (boardData) => {
         const hydratedBoard = Object.assign(new chessboard(), boardData);
@@ -138,49 +152,60 @@ const ChessboardComponent = ({ roomCode }) => {
         : [];
 
     return (
-        <div className="chessboard-container">
-            <div className="chessboard">
-                {transposedBoard.slice().reverse().map((row, rowIndex) => (
-                    <div key={rowIndex} className="row">
-                        <div className="rank-label">{8 - rowIndex}</div>
-                        {row.map((cell, colIndex) => (
-                            <div
-                                key={`${colIndex}-${rowIndex}`}
-                                className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
-                                onClick={() => handleCellClick(cell)}
-                                onMouseEnter={() => handleMouseEnter(cell)}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                <PieceComponent piece={cell.piece} />
-                                {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
-                                {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
-                                {hoveredCell === cell && cell.piece && (
-                                    <div className="cell-popup">
-                                        {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
-                                    </div>
-                                )}
-                            </div>
+        <div>
+            <div>
+                {roomInfo &&
+                    <div>
+                        <h1>Players:</h1>
+                        <ul>{roomInfo.players.map((user, index) => { 
+                            return <li key={`${user.username} ${index}`}>{user.username}</li>; })}
+                        </ul>
+                    </div>}
+            </div>
+            <div className="chessboard-container">
+                <div className="chessboard">
+                    {transposedBoard.slice().reverse().map((row, rowIndex) => (
+                        <div key={rowIndex} className="row">
+                            <div className="rank-label">{8 - rowIndex}</div>
+                            {row.map((cell, colIndex) => (
+                                <div
+                                    key={`${colIndex}-${rowIndex}`}
+                                    className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                    onClick={() => handleCellClick(cell)}
+                                    onMouseEnter={() => handleMouseEnter(cell)}
+                                    onMouseLeave={handleMouseLeave}
+                                >
+                                    <PieceComponent piece={cell.piece} />
+                                    {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                    {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                    {hoveredCell === cell && cell.piece && (
+                                        <div className="cell-popup">
+                                            {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                    <div className="file-labels">
+                        {files.map((file, index) => (
+                            <div key={index} className="file-label">{file}</div>
                         ))}
                     </div>
-                ))}
-                <div className="file-labels">
-                    {files.map((file, index) => (
-                        <div key={index} className="file-label">{file}</div>
-                    ))}
                 </div>
-            </div>
 
-            {selectedPiece && (
-                <div className="piece-rename-container">
-                    <input
-                        type="text"
-                        value={pieceNameInput}
-                        onChange={(e) => setPieceNameInput(e.target.value)}
-                        placeholder="Rename selected piece"
-                    />
-                    <button onClick={handlePieceNameChange}>Rename Piece</button>
-                </div>
-            )}
+                {selectedPiece && (
+                    <div className="piece-rename-container">
+                        <input
+                            type="text"
+                            value={pieceNameInput}
+                            onChange={(e) => setPieceNameInput(e.target.value)}
+                            placeholder="Rename selected piece"
+                        />
+                        <button onClick={handlePieceNameChange}>Rename Piece</button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

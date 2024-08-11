@@ -43,14 +43,16 @@ io.on('connection', (socket) => {
             socket.join(roomCode);
             rooms[roomCode].players.push({ id: socket.id, username });
  
-            io.emit('roomsList', rooms);
             io.to(roomCode).emit('joinedRoom', { room: rooms[roomCode] });
+            io.emit('roomsList', rooms);
         }
     });
 
     socket.on('loadedRoom', ({ roomCode }) => {
         if (rooms[roomCode] && rooms[roomCode].players.length >= 2) {
-            io.to(roomCode).emit('newGame');
+            // pick a random player to start the game
+            const randomPlayer = Math.floor(Math.random() * 2);
+            io.to(roomCode).emit('newGame', { turn: rooms[roomCode].players[randomPlayer].id });
         }
     });
 
@@ -60,6 +62,14 @@ io.on('connection', (socket) => {
             room.board = newBoard;
             io.to(roomCode).emit('updateBoard', { newBoard });
         }
+    });
+
+    socket.on('changeTurn', ({ roomCode }) => {
+        io.to(roomCode).emit('changeTurn');
+    });
+
+    socket.on('getID', () => {
+        io.to(socket.id).emit('getID', { playerID: socket.id });
     });
 
     socket.on('playerLeft', ({ roomCode }) => {

@@ -16,20 +16,39 @@ const ChessboardComponent = ({ roomCode, username }) => {
     const [validMoves, setValidMoves] = useState([]);
     const [validAttacks, setValidAttacks] = useState([]);
     const [hoveredCell, setHoveredCell] = useState(null);
-
     const [pieceNameInput, setPieceNameInput] = useState("");
-
     const [roomInfo, setRoomInfo] = useState(null);
+    const [color, setColor] = useState(null);
+    const [currentTurn, setCurrentTurn] = useState(colors.WHITE);
+
+    let id = null;
 
     useEffect(() => {
+        socket.emit('getID', {});
         socket.emit('joinRoom', { roomCode, username });
         socket.emit('loadedRoom', { roomCode });
 
-        socket.on('newGame', () => {
+        socket.on('newGame', ({ turn }) => {
+            if (turn === id) {
+                setColor(prevColor => {
+                    return colors.WHITE;
+                })
+                console.log("You are white");
+            } else {
+                setColor(prevColor => {
+                    return colors.BLACK;
+                })
+                console.log("You are black");
+            }
+
             const newBoard = new chessboard();
             newBoard.standardSetup();
             setBoard(newBoard);
             socket.emit('updateBoard', { roomCode, newBoard });
+        });
+
+        socket.on('getID', ({ playerID }) => {
+            id = playerID;
         });
 
         socket.on('updateBoard', ({ newBoard }) => {
@@ -37,9 +56,16 @@ const ChessboardComponent = ({ roomCode, username }) => {
             setBoard(hydratedBoard);
         });
 
+        socket.on('changeTurn', () => {
+            setCurrentTurn(prevTurn => {
+                const newTurn = prevTurn === colors.WHITE ? colors.BLACK : colors.WHITE;
+                return newTurn;
+            });
+        });
+
+
         socket.on('joinedRoom', ({ room }) => {
             setRoomInfo(room);
-            console.log(room);
         });
 
         socket.on('updateRoom', ({ room }) => {
@@ -47,7 +73,6 @@ const ChessboardComponent = ({ roomCode, username }) => {
         });
 
         return () => {
-            console.log('leaving room:', roomCode);
             socket.emit('playerLeft', { roomCode });
             socket.off('updateBoard');
         };
@@ -69,23 +94,36 @@ const ChessboardComponent = ({ roomCode, username }) => {
         return hydratedBoard;
     };
 
+    const isYourTurn = () => {
+        return color === currentTurn;
+    };
+
     const handleCellClick = (cell) => {
         let newBoard = board;
         if (selectedPiece && cell) {
             if (cell.piece && cell.piece.color === selectedPiece.color) {
                 selectPiece(cell);
-            } else if (cell.piece && cell.piece.color !== selectedPiece.color) {
-                selectedPiece.attack(cell.piece, newBoard);
+            } else if (cell.piece && cell.piece.color !== selectedPiece.color && isYourTurn()) {
+                let attacked = selectedPiece.attack(cell.piece, newBoard);
                 socket.emit('updateBoard', { roomCode, newBoard });
+                if (attacked) {
+                    socket.emit('changeTurn', { roomCode });
+                }
+
+                deselectPiece();
+            } else if (isYourTurn()) {
+                let moved = selectedPiece.move(cell.x, cell.y, newBoard);
+                socket.emit('updateBoard', { roomCode, newBoard });
+                if (moved) {
+                    socket.emit('changeTurn', { roomCode });
+                }
                 deselectPiece();
             } else {
-                selectedPiece.move(cell.x, cell.y, newBoard);
-                socket.emit('updateBoard', { roomCode, newBoard });
                 deselectPiece();
             }
             setBoard(newBoard);
         } else {
-            if (cell.piece) {
+            if (cell.piece && cell.piece.color === color) {
                 selectPiece(cell);
             }
         }
@@ -157,36 +195,65 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 {roomInfo &&
                     <div>
                         <h1>Players:</h1>
-                        <ul>{roomInfo.players.map((user, index) => { 
-                            return <li key={`${user.username} ${index}`}>{user.username}</li>; })}
+                        <ul>{roomInfo.players.map((user, index) => {
+                            return <li key={`${user.username} ${index}`}>{user.username}</li>;
+                        })}
                         </ul>
+                        {color !== null && currentTurn !== null &&
+                            <h1>{color === currentTurn ? "Your Turn" : "Opponent's Turn"}</h1>}
                     </div>}
             </div>
             <div className="chessboard-container">
                 <div className="chessboard">
-                    {transposedBoard.slice().reverse().map((row, rowIndex) => (
-                        <div key={rowIndex} className="row">
-                            <div className="rank-label">{8 - rowIndex}</div>
-                            {row.map((cell, colIndex) => (
-                                <div
-                                    key={`${colIndex}-${rowIndex}`}
-                                    className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
-                                    onClick={() => handleCellClick(cell)}
-                                    onMouseEnter={() => handleMouseEnter(cell)}
-                                    onMouseLeave={handleMouseLeave}
-                                >
-                                    <PieceComponent piece={cell.piece} />
-                                    {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
-                                    {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
-                                    {hoveredCell === cell && cell.piece && (
-                                        <div className="cell-popup">
-                                            {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ))}
+                    {color === colors.WHITE ?
+                        transposedBoard.slice().reverse().map((row, rowIndex) => (
+                            <div key={rowIndex} className="row">
+                                <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
+                                {row.map((cell, colIndex) => (
+                                    <div
+                                        key={`${colIndex}-${rowIndex}`}
+                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                        onClick={() => handleCellClick(cell)}
+                                        onMouseEnter={() => handleMouseEnter(cell)}
+                                        onMouseLeave={handleMouseLeave}
+                                    >
+                                        <PieceComponent piece={cell.piece} />
+                                        {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                        {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                        {hoveredCell === cell && cell.piece && (
+                                            <div className="cell-popup">
+                                                {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ))
+                        :
+                        transposedBoard.map((row, rowIndex) => (
+                            <div key={rowIndex} className="row">
+                                <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
+                                {row.map((cell, colIndex) => (
+                                    <div
+                                        key={`${colIndex}-${rowIndex}`}
+                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                        onClick={() => handleCellClick(cell)}
+                                        onMouseEnter={() => handleMouseEnter(cell)}
+                                        onMouseLeave={handleMouseLeave}
+                                    >
+                                        <PieceComponent piece={cell.piece} />
+                                        {validMoves.some(move => move.x === cell.x && move.y === cell.y) && <div className="highlight-circle move"></div>}
+                                        {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && <div className="highlight-circle attack"></div>}
+                                        {hoveredCell === cell && cell.piece && (
+                                            <div className="cell-popup">
+                                                {cell.piece ? `${cell.piece.color == colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})` : `Empty (${cell.x}, ${cell.y})`}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ))
+                    }
                     <div className="file-labels">
                         {files.map((file, index) => (
                             <div key={index} className="file-label">{file}</div>

@@ -86,6 +86,11 @@ class chesspiece {
         this.validMoves = [];
 
         this.movementPattern.forEach((move) => {
+            if(this.color === colors.BLACK) {
+                move.x *= -1;
+                move.y *= -1;
+            }
+
             let x = this.position.x + move.x;
             let y = this.position.y + move.y;
 
@@ -99,6 +104,11 @@ class chesspiece {
         this.validAttacks = [];
 
         this.attackPattern.forEach((attack) => {
+            if(this.color === colors.BLACK) {
+                attack.x *= -1;
+                attack.y *= -1;
+            }
+            
             let x = this.position.x + attack.x;
             let y = this.position.y + attack.y;
 

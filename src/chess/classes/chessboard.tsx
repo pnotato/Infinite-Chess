@@ -80,7 +80,7 @@ class chessboard {
 
         for (let i = 0; i < 8; i++) {
             this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: i, y: 6 }},
-                { name: "Pawn", emoji: "♟", movement: [{ x: 0, y: -1 }], attack: [{ x: 1, y: -1 }], traits: [] }), i, 6);
+                info['pawn']), i, 6);
         }
     }
 }

@@ -32,6 +32,7 @@ io.on('connection', (socket) => {
         rooms[roomCode] = {
             players: [],
             board: null,
+            rematchVotes: 0,
         };
 
         io.to(socket.id).emit('roomCreated', { roomCode });
@@ -70,6 +71,17 @@ io.on('connection', (socket) => {
 
     socket.on('changeTurn', ({ roomCode }) => {
         io.to(roomCode).emit('changeTurn');
+    });
+
+    socket.on('voteRematch', ({ roomCode }) => {
+        const room = rooms[roomCode];
+        room.rematchVotes += 1;
+        io.to(roomCode).emit('updateVotes', { votes: room.rematchVotes });
+        if (room.rematchVotes === 2) {
+            const randomPlayer = Math.floor(Math.random() * 2);
+            io.to(roomCode).emit('newGame', { turn: rooms[roomCode].players[randomPlayer].id });
+            room.rematchVotes = 0;
+        }
     });
 
     socket.on('getID', () => {

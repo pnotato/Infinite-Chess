@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import './lobby.css';
 
-const socket = io('http://3.149.237.145:3000');
+const socket = io('https://3.149.237.145:3000');
 
 function Lobby() {
     const [rooms, setRooms] = useState([]);  // List of open rooms

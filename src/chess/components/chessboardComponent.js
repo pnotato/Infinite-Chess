@@ -8,7 +8,7 @@ import PieceComponent from './pieceComponent';
 import getResponse from '../helper-funcs/getResponse.tsx';
 import { io } from 'socket.io-client';
 
-const socket = io('http://3.149.237.145:3000');
+const socket = io('https://3.149.237.145:3000');
 
 const ChessboardComponent = ({ roomCode, username }) => {
     const [board, setBoard] = useState(null);

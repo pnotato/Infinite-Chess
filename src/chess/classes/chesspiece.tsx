@@ -6,6 +6,9 @@ class chesspiece {
     // ------------------- Properties -------------------
     name: string;
     emoji: string;
+    description: string;
+
+    favourite: boolean;
 
     color: colors;
     position: { x: number, y: number };
@@ -21,7 +24,7 @@ class chesspiece {
     isKing: boolean;
 
     constructor(basic: { color: colors, position: { x: number, y: number } },
-        custom: { name: string, emoji: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }, isKing: boolean = false) {
+        custom: { name: string, emoji: string, description: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }, isKing: boolean = false) {
 
         if (!basic || !custom) {
             return;
@@ -34,6 +37,9 @@ class chesspiece {
 
         this.name = custom.name;
         this.emoji = custom.emoji;
+        this.description = custom.description;
+
+        this.favourite = false;
 
         this.movementPattern = custom.movement;
         this.attackPattern = custom.attack;
@@ -41,9 +47,10 @@ class chesspiece {
     }
 
     // ------------------- Methods -------------------
-    updateInfo(custom: { name: string, emoji: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: string[] }, board: chessboard) {
+    updateInfo(custom: { name: string, emoji: string, description: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: string[] }, board: chessboard) {
         this.name = custom.name;
         this.emoji = custom.emoji;
+        this.description = custom.description;
 
         this.movementPattern = custom.movement;
         this.attackPattern = custom.attack;
@@ -80,6 +87,10 @@ class chesspiece {
 
         this.getValidMoves(board);
         this.getValidAttacks(board);
+    }
+
+    favouritePiece() {
+        this.favourite = !this.favourite;
     }
 
     getValidMoves(board: chessboard) {

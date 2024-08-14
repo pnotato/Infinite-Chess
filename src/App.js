@@ -3,6 +3,7 @@ import Lobby from './lobby';
 import PlayPage from './chess/components/playPage';
 import { BrowserRouter, Route, Routes, createBrowserRouter, RouterProvider } from 'react-router-dom';
 import socket from './chess/socket';
+import AnimatedBackground from './animatedBackground';
 
 function App() {
   const router = createBrowserRouter([
@@ -17,7 +18,10 @@ function App() {
   ]);
 
   return (
-    <RouterProvider router={router} />
+    <>
+      <AnimatedBackground />
+      <RouterProvider router={router} />
+    </>
   );
 }
 

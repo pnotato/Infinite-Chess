@@ -19,7 +19,7 @@ function PlayPage() {
         <Container maxWidth="lg">
             {roomCode && username && (
                 <Box mt={4}>
-                    <Typography variant="h4" align="center">Chess Game</Typography>
+                    <Typography variant="h4" align="center">Infinite Chess</Typography>
                     <ChessboardComponent roomCode={roomCode} username={username} />
                 </Box>
             )}

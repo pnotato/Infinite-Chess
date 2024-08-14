@@ -1,5 +1,6 @@
 import React from 'react';
-import './PieceDisplay.css'; // Assuming you add some styles for the grid and display
+import './PieceDisplay.css';
+import { Typography } from '@mui/material';
 
 function PieceDisplay({ piece }) {
   if (!piece) {
@@ -13,15 +14,15 @@ function PieceDisplay({ piece }) {
 
     for (let y = 14; y >= 0; y--) {
       for (let x = 0; x < 15; x++) {
-        const isInPattern = pattern.some(pos => 
-          piece.color === "BLACK" 
-            ? pos.x === -(x - centerX) && pos.y === -(y - centerY) 
+        const isInPattern = pattern.some(pos =>
+          piece.color === "BLACK"
+            ? pos.x === -(x - centerX) && pos.y === -(y - centerY)
             : pos.x === x - centerX && pos.y === y - centerY
         );
 
         grid.push(
-          <div 
-            key={`${x}-${y}`} 
+          <div
+            key={`${x}-${y}`}
             className={`grid-cell ${x === centerX && y === centerY ? 'center' : ''} ${isInPattern ? type : ''}`}
           />
         );
@@ -32,15 +33,13 @@ function PieceDisplay({ piece }) {
 
   return (
     <div className="piece-display">
+      <Typography variant="h6" align="center">Information</Typography>
       <div className="piece-info">
         <div><strong>Name:</strong> {piece.name}</div>
         <div><strong>Emoji:</strong> {piece.emoji}</div>
-        <div><strong>Color:</strong> {piece.color}</div>
-        <div><strong>Position:</strong> ({piece.position.x}, {piece.position.y})</div>
-        <div><strong>Traits:</strong> {piece.traits.join(', ')}</div>
-        <div><strong>Is King:</strong> {piece.isKing ? 'Yes' : 'No'}</div>
+
       </div>
-      
+
       <div className={`grid-container ${piece.color === 'BLACK' ? 'flipped' : ''}`}>
         <div className="grid-title">Movement Pattern</div>
         <div className="grid">
@@ -50,6 +49,9 @@ function PieceDisplay({ piece }) {
         <div className="grid">
           {renderRelativeGrid(piece.attackPattern, 'attack')}
         </div>
+      </div>
+      <div className="piece-info">
+        <div><strong>Description:</strong> {piece.description}</div>
       </div>
     </div>
   );

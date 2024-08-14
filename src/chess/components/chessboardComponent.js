@@ -8,6 +8,7 @@ import PieceComponent from './pieceComponent';
 import getResponse from '../helper-funcs/getResponse.tsx';
 import { io } from 'socket.io-client';
 import PieceDisplay from './pieceDisplay.js';
+import PieceGrid from './pieceGrid.js';
 
 import socket from '../socket.js';
 
@@ -32,8 +33,6 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
     const [loadingCell, setLoadingCell] = useState(null);
 
-    const [test, setTest] = useState("didn't work");
-
     let id = null;
 
     useEffect(() => {
@@ -45,13 +44,18 @@ const ChessboardComponent = ({ roomCode, username }) => {
         window.addEventListener('beforeunload', handleBeforeUnload);
 
         socket.on('newGame', ({ turn }) => {
-            console.log("New Game");
-            setTest("omg it did work :)");
             setVotedRematch(false);
             setGameOver(false);
             setWinner(null);
             setCurrentTurn(colors.WHITE);
             setNumVotes(0);
+            setSelectedCell(null);
+            setSelectedPiece(null);
+            setValidMoves([]);
+            setValidAttacks([]);
+
+            setPieceNameInput("");
+
             if (turn === id) {
                 setColor(prevColor => {
                     return colors.WHITE;
@@ -67,6 +71,9 @@ const ChessboardComponent = ({ roomCode, username }) => {
             const newBoard = new chessboard();
             newBoard.standardSetup();
             setBoard(newBoard);
+
+            setPreviewedPiece(newBoard.cells[0][0].piece);
+
             socket.emit('updateBoard', { roomCode, newBoard });
         });
 
@@ -147,7 +154,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
         if (cell.piece) {
             setPreviewedPiece(cell.piece);
         } else {
-            setPreviewedPiece(null);
+            //setPreviewedPiece(null);
         }
 
         if (selectedPiece && cell) {
@@ -229,12 +236,19 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 emoji: data.emoji,
                 movement: data.movement,
                 attack: data.attack,
-                traits: data.traits
+                traits: data.traits,
+                description: data.description
             },
                 board
             );
 
+            // Save piece to localStorage
+            const storedPieces = JSON.parse(localStorage.getItem('createdPieces')) || [];
+            storedPieces.push(selectedPiece);
+            localStorage.setItem('createdPieces', JSON.stringify(storedPieces));
+
             setLoadingCell(null);
+            setPreviewedPiece(selectedPiece);
 
             const newBoard = board;
             socket.emit('updateBoard', { roomCode, newBoard });
@@ -243,6 +257,10 @@ const ChessboardComponent = ({ roomCode, username }) => {
             setValidAttacks(selectedPiece.validAttacks || []);
             setValidMoves(selectedPiece.validMoves || []);
         }
+    };
+
+    const handleBarracksPieceClick = (piece) => {
+        setPreviewedPiece(piece);
     };
 
     const rematch = () => {
@@ -257,16 +275,16 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
     return (
         <div>
-            {test}
             {board ? (
                 <Box display="flex">
+                    
                     <Grid container spacing={2}>
                         <Grid item xs={9}>
+                            <Typography variant="h6">
+                                {gameOver ? "Game Over" : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
+                            </Typography>
                             <Paper elevation={3}>
                                 <Box p={2}>
-                                    <Typography variant="h6">
-                                        {gameOver ? "Game Over" : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
-                                    </Typography>
                                     <div className="chessboard-container">
                                         <div className="chessboard">
                                             {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
@@ -328,8 +346,8 @@ const ChessboardComponent = ({ roomCode, username }) => {
                             )}
                         </Grid>
                     </Grid>
-                    <Box width={300} p={2}>
-                        <Typography variant="h6">Piece Info</Typography>
+                    <PieceGrid onPieceClick={handleBarracksPieceClick} />
+                    <Box width={300}>
                         {previewedPiece && <PieceDisplay piece={previewedPiece} />}
                     </Box>
                 </Box>

@@ -1,0 +1,52 @@
+.piece-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.piece-info {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grid-container.flipped .grid {
+  transform: rotate(180deg);
+}
+
+.grid-title {
+  text-align: center;
+  font-weight: bold;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(15, 10px);
+  grid-template-rows: repeat(15, 10px);
+  gap: 2px;
+}
+
+.grid-cell {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.grid-cell.center {
+  background-color: #ffff99; /* Yellow for the piece itself */
+}
+
+.grid-cell.move {
+  background-color: rgba(0, 255, 0, 0.5); /* Green for movement */
+}
+
+.grid-cell.attack {
+  background-color: rgba(255, 0, 0, 0.5); /* Red for attack */
+}

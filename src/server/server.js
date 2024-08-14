@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3001', // Client origin
+        origin: '*', // Client origin
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type'],
     }
@@ -16,13 +16,15 @@ const io = new Server(server, {
 let rooms = {}; // Store game states per room
 
 app.use(cors({
-    origin: 'http://localhost:3001', // Replace with the origin of your front-end
+    origin: '*', // Replace with the origin of your front-end
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
 
 // Add a new listener for fetching rooms and creating rooms
 io.on('connection', (socket) => {
+    console.log('a user connected:', socket.id);
+
     socket.on('getRooms', () => {
         socket.emit('roomsList', rooms);
     });
@@ -30,6 +32,7 @@ io.on('connection', (socket) => {
     socket.on('createRoom', ({ username }) => {
         const roomCode = `room-${Math.floor(Math.random() * 10000)}`;
         rooms[roomCode] = {
+            name: (username + "'s Room"),
             players: [],
             board: null,
             rematchVotes: 0,
@@ -73,6 +76,10 @@ io.on('connection', (socket) => {
         io.to(roomCode).emit('changeTurn');
     });
 
+    socket.on('redirect', ({ roomCode }) => {
+        io.to(roomCode).emit('redirect', { roomCode });
+    });
+
     socket.on('voteRematch', ({ roomCode }) => {
         const room = rooms[roomCode];
         room.rematchVotes += 1;
@@ -93,11 +100,18 @@ io.on('connection', (socket) => {
         const room = rooms[roomCode];
         if (room) {
             room.players = room.players.filter(player => player.id !== socket.id);
+            console.log('players:', room.players);
             io.to(roomCode).emit('updateRoom', { room });
+        }
+
+        if (room.players.length === 0) {
+            delete rooms[roomCode];
+            io.emit('roomsList', rooms);
         }
     });
 
     socket.on('disconnect', () => {
+        console.log('user disconnected:', socket.id);
         for (const roomCode in rooms) {
             const room = rooms[roomCode];
             const playerIndex = room.players.findIndex(player => player.id === socket.id);

@@ -20,10 +20,10 @@ class chesspiece {
 
     isKing: boolean;
 
-    constructor(basic: { color: colors, position: { x: number, y: number }},
+    constructor(basic: { color: colors, position: { x: number, y: number } },
         custom: { name: string, emoji: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }, isKing: boolean = false) {
 
-        if(!basic || !custom) {
+        if (!basic || !custom) {
             return;
         }
 
@@ -86,7 +86,7 @@ class chesspiece {
         this.validMoves = [];
 
         this.movementPattern.forEach((move) => {
-            if(this.color === colors.BLACK) {
+            if (this.color === colors.BLACK) {
                 move.x *= -1;
                 move.y *= -1;
             }
@@ -104,11 +104,11 @@ class chesspiece {
         this.validAttacks = [];
 
         this.attackPattern.forEach((attack) => {
-            if(this.color === colors.BLACK) {
+            if (this.color === colors.BLACK) {
                 attack.x *= -1;
                 attack.y *= -1;
             }
-            
+
             let x = this.position.x + attack.x;
             let y = this.position.y + attack.y;
 
@@ -151,6 +151,18 @@ class chesspiece {
 
     destroy(board: chessboard) {
         board.setPiece(null, this.position.x, this.position.y);
+
+        if (this.traits.includes(traits.RADIUS)) {
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    let piece = board.getPiece(this.position.x + i, this.position.y + j);
+                    if (piece && piece !== this) {
+                        piece.destroy(board);
+                    }
+                }
+            }
+        }
+
         console.log(`${this.color} ${this.name} destroyed!`);
         if (this.isKing) {
             board.gameOver(this.color);
@@ -193,7 +205,7 @@ class chesspiece {
                     }
                 });
             }
- 
+
             targets.forEach((currentTarget) => {
                 currentTarget.destroy(board);
             });

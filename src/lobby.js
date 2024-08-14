@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import ChessboardComponent from './chess/components/chessboardComponent';
+import RoomPopup from './RoomPopup'; // Import the new RoomPopup component
 import './lobby.css';
+import socket from './chess/socket';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { Button } from '@mui/material';
 
-const socket = io('http://localhost:3000');
+//const socket = io('http://localhost:3000');
 
 function Lobby() {
     const [rooms, setRooms] = useState([]);  // List of open rooms
     const [username, setUsername] = useState('');
+    const [currentRoom, setCurrentRoom] = useState(null); // Track the current room popup state
 
     useEffect(() => {
         // Fetch initial list of open rooms
@@ -18,23 +22,16 @@ function Lobby() {
             setRooms(rooms);
         });
 
-        // room is created and ready to join
-        socket.on('roomCreated', ({ roomCode }) => {
-            goToRoom(roomCode);
-        });
-
         return () => {
             socket.off('roomsList');
-            socket.off('roomCreated');
         };
     }, []);
 
     const joinRoom = (roomCode) => {
         if (username) {
             if (rooms[roomCode].players.length < 2) {
-                goToRoom(roomCode);
-            }
-            else {
+                setCurrentRoom({ roomCode, isHost: false }); // Show the room popup as a participant
+            } else {
                 alert('Room is full');
             }
         }
@@ -43,16 +40,23 @@ function Lobby() {
     const createRoom = () => {
         if (username) {
             socket.emit('createRoom', { username });
+            socket.on('roomCreated', ({ roomCode }) => {
+                setCurrentRoom({ roomCode, isHost: true }); // Show the room popup as the host
+            });
         }
     };
 
-    function goToRoom(roomCode) {
-        sessionStorage.setItem('roomCode', roomCode);
-        window.location.href = '/play';
+    const startGame = (roomCode) => {
+        socket.emit('redirect', { roomCode });
+    };
+
+    const refreshRooms = () => {
+        socket.emit('getRooms');
     }
 
     return (
         <div className="lobby-container">
+            {!currentRoom &&
             <div className="lobby">
                 <h1>Join a Chess Room</h1>
                 <input
@@ -70,7 +74,7 @@ function Lobby() {
                     {Object.keys(rooms).length > 0 ? (
                         Object.keys(rooms).map((roomCode, index) => (
                             <div key={index} className="room-item">
-                                <span>{roomCode}</span>
+                                <span>{rooms[roomCode].name}</span>
                                 <span>Players: {rooms[roomCode].players.length}</span>
                                 <button onClick={() => joinRoom(roomCode)} className="join-button">Join</button>
                             </div>
@@ -79,8 +83,21 @@ function Lobby() {
                         <p>No rooms available. Create a new one!</p>
                     )}
                 </div>
-                <button onClick={createRoom} className="create-button">Create New Room</button>
-            </div>
+                <Button onClick={createRoom} variant="contained" color="primary">
+                    <p>Create New Room</p>
+                </Button>
+                <Button onClick={refreshRooms} variant="contained" color="primary">
+                    <RefreshIcon />
+                </Button>
+            </div>}
+            {currentRoom && (
+                <RoomPopup 
+                    roomCode={currentRoom.roomCode} 
+                    isHost={currentRoom.isHost} 
+                    username={username}
+                    startGame={startGame}
+                />
+            )}
         </div>
     );
 }

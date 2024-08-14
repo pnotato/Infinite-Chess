@@ -1,9 +1,6 @@
-import ChessboardComponent from "./chessboardComponent";
-import { useEffect, useState } from "react";
-
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3000');
+import React, { useEffect, useState } from 'react';
+import { Box, Container, Typography } from '@mui/material';
+import ChessboardComponent from './chessboardComponent';
 
 function PlayPage() {
     const [roomCode, setRoomCode] = useState(sessionStorage.getItem('roomCode'));
@@ -16,13 +13,17 @@ function PlayPage() {
         if (!roomCode || !username) {
             window.location.href = '/';
         }
-    });
+    }, [roomCode, username]);
 
     return (
-        <div>
-            {(roomCode && username) && 
-            <ChessboardComponent roomCode={roomCode} username={username} />}
-        </div>
+        <Container maxWidth="lg">
+            {roomCode && username && (
+                <Box mt={4}>
+                    <Typography variant="h4" align="center">Chess Game</Typography>
+                    <ChessboardComponent roomCode={roomCode} username={username} />
+                </Box>
+            )}
+        </Container>
     );
 }
 

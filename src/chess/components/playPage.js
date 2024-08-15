@@ -16,14 +16,14 @@ function PlayPage() {
     }, [roomCode, username]);
 
     return (
-        <Container maxWidth="lg">
+        <>
             {roomCode && username && (
-                <Box mt={4}>
+                <Box width='100%'>
                     <Typography variant="h4" align="center">Infinite Chess</Typography>
                     <ChessboardComponent roomCode={roomCode} username={username} />
                 </Box>
             )}
-        </Container>
+        </>
     );
 }
 

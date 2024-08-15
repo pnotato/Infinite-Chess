@@ -3,7 +3,7 @@ import PieceGridItem from './pieceGridItem';
 import { Grid, Typography, Button } from '@mui/material';
 import chesspiece from '../classes/chesspiece.tsx';
 
-function PieceGrid({ onPieceClick }) {
+function PieceGrid({ onPieceClick, refreshGrid, setRefreshGrid }) {
     const [pieces, setPieces] = useState([]);
     const [filteredPieces, setFilteredPieces] = useState([]);
     const [isFiltered, setIsFiltered] = useState(false);
@@ -16,10 +16,11 @@ function PieceGrid({ onPieceClick }) {
     };
 
     useEffect(() => {
-        const storedPieces = JSON.parse(localStorage.getItem('createdPieces')) || [];
-        const hydratedPieces = storedPieces.map(piece => Object.assign(new chesspiece(), piece));
-        setPieces(hydratedPieces);
-        setFilteredPieces(hydratedPieces.filter(piece => piece.favourite));
+        refresh();
+    }, [refreshGrid]);
+
+    useEffect(() => {
+        refresh();
     }, []);
 
     return (
@@ -40,3 +41,4 @@ function PieceGrid({ onPieceClick }) {
 }
 
 export default PieceGrid;
+

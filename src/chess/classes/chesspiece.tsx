@@ -41,8 +41,15 @@ class chesspiece {
 
         this.favourite = false;
 
-        this.movementPattern = custom.movement;
-        this.attackPattern = custom.attack;
+        // flip movement and attack patterns if black
+        if (this.color === colors.BLACK) {
+            this.movementPattern = custom.movement.map((move) => { return { x: move.x * -1, y: move.y * -1 } });
+            this.attackPattern = custom.attack.map((attack) => { return { x: attack.x * -1, y: attack.y * -1 } });
+        } else {
+            this.movementPattern = custom.movement;
+            this.attackPattern = custom.attack;
+        }
+
         this.traits = custom.traits;
     }
 
@@ -52,8 +59,14 @@ class chesspiece {
         this.emoji = custom.emoji;
         this.description = custom.description;
 
-        this.movementPattern = custom.movement;
-        this.attackPattern = custom.attack;
+        // flip movement and attack patterns if black
+        if (this.color === colors.BLACK) {
+            this.movementPattern = custom.movement.map((move) => { return { x: move.x * -1, y: move.y * -1 } });
+            this.attackPattern = custom.attack.map((attack) => { return { x: attack.x * -1, y: attack.y * -1 } });
+        } else {
+            this.movementPattern = custom.movement;
+            this.attackPattern = custom.attack;
+        }
 
         // foreach trait in custom.traits, add a switch statement to add the trait to this.traits
         custom.traits.forEach((trait) => {
@@ -97,11 +110,6 @@ class chesspiece {
         this.validMoves = [];
 
         this.movementPattern.forEach((move) => {
-            if (this.color === colors.BLACK) {
-                move.x *= -1;
-                move.y *= -1;
-            }
-
             let x = this.position.x + move.x;
             let y = this.position.y + move.y;
 
@@ -115,11 +123,6 @@ class chesspiece {
         this.validAttacks = [];
 
         this.attackPattern.forEach((attack) => {
-            if (this.color === colors.BLACK) {
-                attack.x *= -1;
-                attack.y *= -1;
-            }
-
             let x = this.position.x + attack.x;
             let y = this.position.y + attack.y;
 

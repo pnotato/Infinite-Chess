@@ -5,7 +5,8 @@ let pawnInfo = {
     emoji: '♟',
     movement: [{ x: 0, y: 1 }],
     attack: [{ x: -1, y: 1 }, { x: 1, y: 1 }],
-    traits: []
+    traits: [],
+    description: ''
 }
 
 let rookInfo = {
@@ -15,7 +16,8 @@ let rookInfo = {
                 {x: 1, y: 0}, {x: -1, y: 0}, {x: 2, y: 0}, {x: -2, y: 0}, {x: 3, y: 0}, {x: -3, y: 0}, {x: 4, y: 0}, {x: -4, y: 0}, {x: 5, y: 0}, {x: -5, y: 0}, {x: 6, y: 0}, {x: -6, y: 0}, {x: 7, y: 0}, {x: -7, y: 0}],
     attack: [{ x: 0, y: 1 }, { x: 0, y: -1 }, {x: 0, y: 2}, {x: 0, y: -2}, {x: 0, y: 3}, {x: 0, y: -3}, {x: 0, y: 4}, {x: 0, y: -4}, {x: 0, y: 5}, {x: 0, y: -5}, {x: 0, y: 6}, {x: 0, y: -6}, {x: 0, y: 7}, {x: 0, y: -7},
                 {x: 1, y: 0}, {x: -1, y: 0}, {x: 2, y: 0}, {x: -2, y: 0}, {x: 3, y: 0}, {x: -3, y: 0}, {x: 4, y: 0}, {x: -4, y: 0}, {x: 5, y: 0}, {x: -5, y: 0}, {x: 6, y: 0}, {x: -6, y: 0}, {x: 7, y: 0}, {x: -7, y: 0}],
-    traits: []
+    traits: [],
+    description: ''
 }
 
 let knightInfo = {
@@ -23,7 +25,8 @@ let knightInfo = {
     emoji: '♞',
     movement: [{ x: 1, y: 2 }, { x: -1, y: 2 }, { x: 1, y: -2 }, { x: -1, y: -2 }, { x: 2, y: 1 }, { x: -2, y: 1 }, { x: 2, y: -1 }, { x: -2, y: -1 }],
     attack: [{ x: 1, y: 2 }, { x: -1, y: 2 }, { x: 1, y: -2 }, { x: -1, y: -2 }, { x: 2, y: 1 }, { x: -2, y: 1 }, { x: 2, y: -1 }, { x: -2, y: -1 }],
-    traits: [traits.IGNORE_BLOCKED_ATTACK, traits.IGNORE_BLOCKED_MOVE]
+    traits: [traits.IGNORE_BLOCKED_ATTACK, traits.IGNORE_BLOCKED_MOVE],
+    description: ''
 }
 
 let bishopInfo = {
@@ -31,7 +34,8 @@ let bishopInfo = {
     emoji: '♝',
     movement: [{ x: 1, y: 1 }, { x: -1, y: 1 }, { x: 1, y: -1 }, { x: -1, y: -1 }, { x: 2, y: 2 }, { x: -2, y: 2 }, { x: 2, y: -2 }, { x: -2, y: -2 }, { x: 3, y: 3 }, { x: -3, y: 3 }, { x: 3, y: -3 }, { x: -3, y: -3 }, { x: 4, y: 4 }, { x: -4, y: 4 }, { x: 4, y: -4 }, { x: -4, y: -4 }, { x: 5, y: 5 }, { x: -5, y: 5 }, { x: 5, y: -5 }, { x: -5, y: -5 }, { x: 6, y: 6 }, { x: -6, y: 6 }, { x: 6, y: -6 }, { x: -6, y: -6 }, { x: 7, y: 7 }, { x: -7, y: 7 }, { x: 7, y: -7 }, { x: -7, y: -7 }],
     attack: [{ x: 1, y: 1 }, { x: -1, y: 1 }, { x: 1, y: -1 }, { x: -1, y: -1 }, { x: 2, y: 2 }, { x: -2, y: 2 }, { x: 2, y: -2 }, { x: -2, y: -2 }, { x: 3, y: 3 }, { x: -3, y: 3 }, { x: 3, y: -3 }, { x: -3, y: -3 }, { x: 4, y: 4 }, { x: -4, y: 4 }, { x: 4, y: -4 }, { x: -4, y: -4 }, { x: 5, y: 5 }, { x: -5, y: 5 }, { x: 5, y: -5 }, { x: -5, y: -5 }, { x: 6, y: 6 }, { x: -6, y: 6 }, { x: 6, y: -6 }, { x: -6, y: -6 }, { x: 7, y: 7 }, { x: -7, y: 7 }, { x: 7, y: -7 }, { x: -7, y: -7 }],
-    traits: []
+    traits: [],
+    description: ''
 }
 
 let queenInfo = {
@@ -43,7 +47,8 @@ let queenInfo = {
     attack: [{ x: 0, y: 1 }, { x: 0, y: -1 }, {x: 0, y: 2}, {x: 0, y: -2}, {x: 0, y: 3}, {x: 0, y: -3}, {x: 0, y: 4}, {x: 0, y: -4}, {x: 0, y: 5}, {x: 0, y: -5}, {x: 0, y: 6}, {x: 0, y: -6}, {x: 0, y: 7}, {x: 0, y: -7},
                 {x: 1, y: 0}, {x: -1, y: 0}, {x: 2, y: 0}, {x: -2, y: 0}, {x: 3, y: 0}, {x: -3, y: 0}, {x: 4, y: 0}, {x: -4, y: 0}, {x: 5, y: 0}, {x: -5, y: 0}, {x: 6, y: 0}, {x: -6, y: 0}, {x: 7, y: 0}, {x: -7, y: 0},
                 { x: 1, y: 1 }, { x: -1, y: 1 }, { x: 1, y: -1 }, { x: -1, y: -1 }, { x: 2, y: 2 }, { x: -2, y: 2 }, { x: 2, y: -2 }, { x: -2, y: -2 }, { x: 3, y: 3 }, { x: -3, y: 3 }, { x: 3, y: -3 }, { x: -3, y: -3 }, { x: 4, y: 4 }, { x: -4, y: 4 }, { x: 4, y: -4 }, { x: -4, y: -4 }, { x: 5, y: 5 }, { x: -5, y: 5 }, { x: 5, y: -5 }, { x: -5, y: -5 }, { x: 6, y: 6 }, { x: -6, y: 6 }, { x: 6, y: -6 }, { x: -6, y: -6 }, { x: 7, y: 7 }, { x: -7, y: 7 }, { x: 7, y: -7 }, { x: -7, y: -7 }],
-    traits: []
+    traits: [],
+    description: ''
 }
 
 let kingInfo = {
@@ -51,7 +56,8 @@ let kingInfo = {
     emoji: '♚',
     movement: [{ x: 0, y: 1 }, { x: 0, y: -1 }, {x: 1, y: 0}, {x: -1, y: 0}, {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1}],
     attack: [{ x: 0, y: 1 }, { x: 0, y: -1 }, {x: 1, y: 0}, {x: -1, y: 0}, {x: 1, y: 1}, {x: 1, y: -1}, {x: -1, y: 1}, {x: -1, y: -1}],
-    traits: []
+    traits: [],
+    description: ''
 }
 
 let info = {

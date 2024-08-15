@@ -14,8 +14,11 @@ import socket from '../socket.js';
 
 import { Grid, Paper, Typography, Button, Drawer, Box, CircularProgress } from '@mui/material';
 
-//create an 8x8 array of random animation delays
+//random delays
 const animationDelays = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => Math.random() * 5));
+
+//wave delays
+//const animationDelays = Array.from({ length: 8 }, (_, i) => Array.from({ length: 8 }, (_, j) => (i + j) * 1));
 
 const ChessboardComponent = ({ roomCode, username }) => {
     const [board, setBoard] = useState(null);
@@ -328,13 +331,13 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                                                     onClick={() => handleCellClick(cell)}
                                                                     onMouseEnter={() => handleMouseEnter(cell)}
                                                                     onMouseLeave={handleMouseLeave}
-                                                                    style={{ position: 'relative' }}
+                                                                    style={{ position: 'relative', color: `${cell.piece ? (cell.piece.color === colors.BLACK ? 'black' : 'white') : 'white'}` }}
                                                                 >
                                                                     {cell.piece &&
                                                                     (<div className={`color-indicator-${cell.piece.color === colors.BLACK ? 'black' : 'white'}`}></div>)
                                                                     }
                                                                     {loadingCell === cell && (
-                                                                        <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)' }} />
+                                                                        <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)', zIndex: 6 }} />
                                                                     )}
                                                                     <PieceComponent piece={cell.piece} />
                                                                     {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (

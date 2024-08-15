@@ -36,7 +36,7 @@ const AnimatedBackground = () => {
     const drawDot = (dot) => {
       ctx.beginPath();
       ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2, false);
-      ctx.fillStyle = `rgba(200, 200, 200, ${dot.brightness})`;
+      ctx.fillStyle = `rgba(80, 80, 80, ${dot.brightness})`;
       ctx.fill();
     };
 
@@ -44,7 +44,7 @@ const AnimatedBackground = () => {
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
-      ctx.strokeStyle = `rgba(200, 200, 200, ${opacity})`;
+      ctx.strokeStyle = `rgba(80, 80, 80, ${opacity})`;
       ctx.stroke();
     };
 
@@ -102,7 +102,7 @@ const AnimatedBackground = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, zIndex: -1, backgroundColor: '#EEEEEE' }} />;
+  return <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, zIndex: -1, backgroundColor: '#101010' }} />;
 };
 
 export default AnimatedBackground;

@@ -26,16 +26,15 @@ function PieceGrid({ onPieceClick, refreshGrid, setRefreshGrid }) {
 
     return (
         <div className='piece-grid'>
-            <Typography variant="h6" align="center">Barracks</Typography>
+            <Typography variant="h6" align="center" sx={{color: 'white'}}>Barracks</Typography>
             <Button onClick={() => setIsFiltered(!isFiltered)}>
                 {isFiltered ? 'Show All' : 'Show Favorites'}
             </Button>
 
             <div className="piece-list">
                 {(isFiltered ? filteredPieces : pieces).map((piece, index) => (
-                    <PieceGridItem piece={piece} onClick={() => onPieceClick(piece)} onRefresh={refresh} />
+                    <PieceGridItem key={index} piece={piece} onClick={() => onPieceClick(piece)} onRefresh={refresh} />
                 ))}
-
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 .chessboard-container {
-  display: flex;
+  display: grid;
   justify-content: center;
   align-items: center;
   height: 100%;
@@ -18,14 +18,53 @@
 }
 
 .cell {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   font-size: 50px;
   user-select: none;
+  border-radius: 10px;
+}
+
+.cell-3d {
+  animation: float 3s ease-in-out infinite;
+  animation-duration: 5s;
+  animation-fill-mode: both;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(0px, 5px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+.color-indicator-black {
+  background-color: #000000;
+  width: 15%;
+  height: 15%;
+  border-radius: 100%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+.color-indicator-white {
+  background-color: #ffffff;
+  width: 15%;
+  height: 15%;
+  border-radius: 100%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
 }
 
 .white {
@@ -36,20 +75,31 @@
   background-color: #b58863;
 }
 
+.white-copy {
+  background-color: #b4a388;
+}
+
+.black-copy {
+  background-color: #816147;
+}
+
 .rank-label {
   width: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  margin-right: 5px;
+  font-size: 20px;
+  margin-right: -20px;
+  margin-bottom: 60px;
   user-select: none;
+  z-index: 4;
 }
 
 .file-labels {
   display: flex;
   margin-top: 5px;
   user-select: none;
+  margin-left: 70px;
 }
 
 .file-label {
@@ -57,8 +107,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 20px;
   user-select: none;
+  margin-top: -40px;
+  margin-left: 5px;
+  margin-right: 5px;
+  
+  z-index: 4;
+}
+
+.opponent-info, .player-info {
+  display: grid;
+  color: white;
+  z-index: 10;
 }
 
 .highlight-circle {

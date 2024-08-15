@@ -1,10 +1,3 @@
-.piece-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
 .piece-info {
   font-size: 16px;
   line-height: 1.5;
@@ -14,6 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 10vh;
 }
 
 .grid-container.flipped .grid {
@@ -30,6 +24,7 @@
   grid-template-columns: repeat(15, 10px);
   grid-template-rows: repeat(15, 10px);
   gap: 2px;
+  justify-content: center;
 }
 
 .grid-cell {

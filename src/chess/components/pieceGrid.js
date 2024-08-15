@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { Grid, Typography, Button, Box } from '@mui/material';
 import PieceGridItem from './pieceGridItem';
-import { Grid, Typography, Button } from '@mui/material';
+import { useState, useEffect } from 'react';
 import chesspiece from '../classes/chesspiece.tsx';
+import './chessboardComponent.css';
 
 function PieceGrid({ onPieceClick, refreshGrid, setRefreshGrid }) {
     const [pieces, setPieces] = useState([]);
@@ -24,21 +25,20 @@ function PieceGrid({ onPieceClick, refreshGrid, setRefreshGrid }) {
     }, []);
 
     return (
-        <div className="piece-grid">
+        <div className='piece-grid'>
             <Typography variant="h6" align="center">Barracks</Typography>
             <Button onClick={() => setIsFiltered(!isFiltered)}>
                 {isFiltered ? 'Show All' : 'Show Favorites'}
             </Button>
-            <Grid container spacing={2}>
+
+            <div className="piece-list">
                 {(isFiltered ? filteredPieces : pieces).map((piece, index) => (
-                    <Grid item key={index}>
-                        <PieceGridItem piece={piece} onClick={() => onPieceClick(piece)} onRefresh={refresh} />
-                    </Grid>
+                    <PieceGridItem piece={piece} onClick={() => onPieceClick(piece)} onRefresh={refresh} />
                 ))}
-            </Grid>
+
+            </div>
         </div>
     );
 }
 
 export default PieceGrid;
-

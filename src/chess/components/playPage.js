@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import ChessboardComponent from './chessboardComponent';
+import Header from './header';
 
 function PlayPage() {
     const [roomCode, setRoomCode] = useState(sessionStorage.getItem('roomCode'));
@@ -19,7 +20,7 @@ function PlayPage() {
         <>
             {roomCode && username && (
                 <Box width='100%'>
-                    <Typography variant="h4" align="center">Infinite Chess</Typography>
+                    <Header />
                     <ChessboardComponent roomCode={roomCode} username={username} />
                 </Box>
             )}

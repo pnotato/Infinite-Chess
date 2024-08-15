@@ -272,87 +272,98 @@ const ChessboardComponent = ({ roomCode, username }) => {
     return (
         <div>
             {board ? (
-                <Box display="flex" height="100vh">
+                <Box display="flex">
                     {/* Piece Grid (1/4 of the screen on the left) */}
-                    <Box flex={1} display="flex" justifyContent="center" alignItems="center">
-                        <PieceGrid onPieceClick={handleBarracksPieceClick} refreshGrid={refreshGrid} setRefreshGrid={setRefreshGrid} />
-                    </Box>
+                    <div className="barracks-component">
+                        <Box flex={1} display="flex" justifyContent="center" alignItems="center" sx={{ backgroundColor: 'transparent', zIndex: 5 }}>
+                            <PieceGrid onPieceClick={handleBarracksPieceClick} refreshGrid={refreshGrid} setRefreshGrid={setRefreshGrid} />
+                        </Box>
+                    </div>
 
                     {/* Chessboard (1/2 of the screen in the center) */}
                     <Box flex={2} display="flex" justifyContent="center" alignItems="center">
                         <Grid container>
                             <Grid item xs={12}>
                                 <Typography variant="h6">
-                                    {gameOver ? "Game Over" : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
+                                    {gameOver ? "Game Over! You " + (winner ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
                                 </Typography>
-                                <Paper elevation={3}>
-                                    <Box p={2}>
-                                        <div className="chessboard-container">
-                                            <div className="chessboard">
-                                                {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
-                                                    <div key={rowIndex} className="row">
-                                                        <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
-                                                        {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
-                                                            <div
-                                                                key={`${colIndex}-${rowIndex}`}
-                                                                className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
-                                                                onClick={() => handleCellClick(cell)}
-                                                                onMouseEnter={() => handleMouseEnter(cell)}
-                                                                onMouseLeave={handleMouseLeave}
-                                                                style={{ position: 'relative' }}
-                                                            >
-                                                                {loadingCell === cell && (
-                                                                    <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)' }} />
-                                                                )}
-                                                                <PieceComponent piece={cell.piece} />
-                                                                {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (
-                                                                    <div className="highlight-circle move"></div>
-                                                                )}
-                                                                {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && (
-                                                                    <div className="highlight-circle attack"></div>
-                                                                )}
-                                                                {hoveredCell === cell && cell.piece && (
-                                                                    <div className="cell-popup">
-                                                                        {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
 
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ))}
-                                                <div className="file-labels">
-                                                    {color === colors.WHITE ? files.map((file, index) => (
-                                                        <div key={index} className="file-label">{file}</div>
-                                                    )) : files.slice().reverse().map((file, index) => (
-                                                        <div key={index} className="file-label">{file}</div>
+                                {gameOver && (
+                                    <Button variant="contained" color="primary" onClick={rematch} disabled={votedRematch}>
+                                        {votedRematch ? "Waiting for other player..." : "Rematch"}
+                                        {numVotes > 0 && ` (${numVotes}/2)`}
+                                    </Button>
+                                )}
+
+                                <Box p={2}>
+                                    <div className="chessboard-container">
+                                        <div className="chessboard">
+                                            {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
+                                                <div key={rowIndex} className="row">
+                                                    <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
+                                                    {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
+                                                        <div
+                                                            key={`${colIndex}-${rowIndex}`}
+                                                            className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                                                            onClick={() => handleCellClick(cell)}
+                                                            onMouseEnter={() => handleMouseEnter(cell)}
+                                                            onMouseLeave={handleMouseLeave}
+                                                            style={{ position: 'relative' }}
+                                                        >
+                                                            {loadingCell === cell && (
+                                                                <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)' }} />
+                                                            )}
+                                                            <PieceComponent piece={cell.piece} />
+                                                            {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (
+                                                                <div className="highlight-circle move"></div>
+                                                            )}
+                                                            {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && (
+                                                                <div className="highlight-circle attack"></div>
+                                                            )}
+                                                            {hoveredCell === cell && cell.piece && (
+                                                                <div className="cell-popup">
+                                                                    {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
+
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     ))}
                                                 </div>
+                                            ))}
+                                            <div className="file-labels">
+                                                {color === colors.WHITE ? files.map((file, index) => (
+                                                    <div key={index} className="file-label">{file}</div>
+                                                )) : files.slice().reverse().map((file, index) => (
+                                                    <div key={index} className="file-label">{file}</div>
+                                                ))}
                                             </div>
                                         </div>
+                                    </div>
+                                </Box>
+                                {selectedPiece && isYourTurn() && (
+                                    <Box>
+                                        <input
+                                            type="text"
+                                            value={pieceNameInput}
+                                            onChange={(e) => setPieceNameInput(e.target.value)}
+                                            placeholder="Rename selected piece"
+                                        />
+                                        <Button variant="contained" color="primary" onClick={handlePieceNameChange}>
+                                            Transform Piece
+                                        </Button>
                                     </Box>
-                                    {selectedPiece && isYourTurn() && (
-                                        <Box>
-                                            <input
-                                                type="text"
-                                                value={pieceNameInput}
-                                                onChange={(e) => setPieceNameInput(e.target.value)}
-                                                placeholder="Rename selected piece"
-                                            />
-                                            <Button variant="contained" color="primary" onClick={handlePieceNameChange}>
-                                                Transform Piece
-                                            </Button>
-                                        </Box>
-                                    )}
-                                </Paper>
+                                )}
+
                             </Grid>
                         </Grid>
                     </Box>
 
                     {/* Piece Display (1/4 of the screen on the right) */}
-                    <Box flex={1} display="flex" justifyContent="center" alignItems="center">
-                        {previewedPiece && <PieceDisplay piece={previewedPiece} />}
-                    </Box>
+                    <div className="information-component">
+                        <Box flex={1} display="flex" justifyContent="center" alignItems="center">
+                            {previewedPiece && <PieceDisplay piece={previewedPiece} />}
+                        </Box>
+                    </div>
                 </Box>
             ) : <CircularProgress />}
         </div>

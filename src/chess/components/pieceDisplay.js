@@ -1,5 +1,6 @@
 import React from 'react';
 import './PieceDisplay.css';
+import './chessboardComponent.css';
 import { Typography } from '@mui/material';
 import chesspiece from '../classes/chesspiece.tsx';
 import colors from '../enums/colors.tsx';
@@ -38,22 +39,21 @@ function PieceDisplay({ piece }) {
   return (
     <div className="piece-display">
       <Typography variant="h6" align="center">Information</Typography>
-      <Typography fontSize={50} align="center">
-        {rehydratedPiece.emoji}
-      </Typography>
-      <div><strong>Name:</strong> {rehydratedPiece.name}</div>
-      <div className={`grid-container`}>
-        <div className="grid-title">Movement Pattern</div>
-        <div className="grid">
-          {renderRelativeGrid(rehydratedPiece.movementPattern, 'move')}
+      <div className="display">
+        <Typography fontSize={50} align="center">
+          {rehydratedPiece.emoji}
+        </Typography>
+        <div className="grid-title">{rehydratedPiece.name}</div>
+        <div className={`grid-container`}>
+          <div className="grid-title">Movement Pattern</div>
+          <div className="grid">
+            {renderRelativeGrid(rehydratedPiece.movementPattern, 'move')}
+          </div>
+          <div className="grid-title">Attack Pattern</div>
+          <div className="grid">
+            {renderRelativeGrid(rehydratedPiece.attackPattern, 'attack')}
+          </div>
         </div>
-        <div className="grid-title">Attack Pattern</div>
-        <div className="grid">
-          {renderRelativeGrid(rehydratedPiece.attackPattern, 'attack')}
-        </div>
-      </div>
-      <div className="piece-info">
-        <div><strong>Description:</strong> {rehydratedPiece.description}</div>
       </div>
     </div>
   );

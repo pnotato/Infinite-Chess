@@ -34,7 +34,7 @@ function PieceGridItem({ piece, onClick, onRefresh }) {
 
     return (
         <div className="piece-grid-item" onClick={onClick}>
-            <Paper elevation={3} style={{ padding: 10, width: '75px' }}>
+            <Paper align='center' elevation={0} style={{ width: '100px', borderRadius:'15px'}}>
                 <Button onClick={addToFavorites}>
                     {isFavorite ? <StarIcon /> : <StarBorderIcon />}
                 </Button>

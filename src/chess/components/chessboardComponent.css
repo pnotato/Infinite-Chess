@@ -35,6 +35,10 @@
   animation-fill-mode: both;
 }
 
+.cell-3d-selected {
+  color: white;
+}
+
 @keyframes float {
   0% {
     transform: translate(0, 0);

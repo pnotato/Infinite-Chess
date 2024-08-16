@@ -9,10 +9,11 @@ import getResponse from '../helper-funcs/getResponse.tsx';
 import { io } from 'socket.io-client';
 import PieceDisplay from './pieceDisplay.js';
 import PieceGrid from './pieceGrid.js';
-
 import socket from '../socket.js';
-
 import { Grid, Paper, Typography, Button, Drawer, Box, CircularProgress } from '@mui/material';
+
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
 //random delays
 const animationDelays = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => Math.random() * 5));
@@ -276,128 +277,150 @@ const ChessboardComponent = ({ roomCode, username }) => {
         setVotedRematch(true);
     };
 
+    function RenderCell({ cell }) {
+        const [{ isDragging }, drag] = useDrag(() => ({
+            type: 'PIECE',
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+        }), [cell]);
+
+        const [{ isOver }, drop] = useDrop(() => ({
+            accept: 'PIECE',
+            drop: (item) => handleCellClick(cell),
+            collect: (monitor) => ({
+                isOver: monitor.isOver(),
+            }),
+        }), [cell]);
+
+        return (
+            <div
+                ref={drop}
+                className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                onMouseDown={() => handleCellClick(cell)}
+                onMouseEnter={() => handleMouseEnter(cell)}
+                onMouseLeave={handleMouseLeave}
+                style={{ position: 'relative', color: `${cell.piece ? (cell.piece.color === colors.BLACK ? 'black' : 'white') : 'white'}` }}
+            >
+                {cell.piece &&
+                    (<div className={`color-indicator-${cell.piece.color === colors.BLACK ? 'black' : 'white'}`}></div>)
+                }
+                {loadingCell === cell && (
+                    <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)', zIndex: 6 }} />
+                )}
+                <PieceComponent piece={cell.piece} />
+                {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (
+                    <div className="highlight-circle move"></div>
+                )}
+                {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && (
+                    <div className="highlight-circle attack"></div>
+                )}
+                {hoveredCell === cell && cell.piece && (
+                    <div className="cell-popup">
+                        {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const transposedBoard = board?.cells.length > 0
         ? board.cells[0].map((_, colIndex) => board.cells.map(row => row[colIndex]))
         : [];
 
     return (
-        <div>
-            {board ? (
-                <Box display="flex">
-                    {/* Piece Grid (1/4 of the screen on the left) */}
-                    <div className="barracks-component">
-                        <Box flex={1} display="flex" justifyContent="center" alignItems="center" sx={{ backgroundColor: 'transparent', zIndex: 5 }}>
-                            <PieceGrid onPieceClick={handleBarracksPieceClick} refreshGrid={refreshGrid} setRefreshGrid={setRefreshGrid} />
-                        </Box>
-                    </div>
+        <DndProvider backend={HTML5Backend}>
+            <div>
+                {board ? (
+                    <Box display="flex">
+                        {/* Piece Grid (1/4 of the screen on the left) */}
+                        <div className="barracks-component">
+                            <Box flex={1} display="flex" justifyContent="center" alignItems="center" sx={{ backgroundColor: 'transparent', zIndex: 5 }}>
+                                <PieceGrid onPieceClick={handleBarracksPieceClick} refreshGrid={refreshGrid} setRefreshGrid={setRefreshGrid} />
+                            </Box>
+                        </div>
 
-                    {/* Chessboard (1/2 of the screen in the center) */}
-                    <Box flex={2} display="flex" justifyContent="center" alignItems="center">
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Typography variant="h6" color={'white'}>
-                                    {gameOver ? "Game Over! You " + (winner ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
-                                </Typography>
+                        {/* Chessboard (1/2 of the screen in the center) */}
+                        <Box flex={2} display="flex" justifyContent="center" alignItems="center">
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <Typography variant="h6" color={'white'}>
+                                        {gameOver ? "Game Over! You " + (winner ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
+                                    </Typography>
 
-                                {gameOver && (
-                                    <Button variant="contained" color="primary" onClick={rematch} disabled={votedRematch}>
-                                        {votedRematch ? "Waiting for other player..." : "Rematch"}
-                                        {numVotes > 0 && ` (${numVotes}/2)`}
-                                    </Button>
-                                )}
+                                    {gameOver && (
+                                        <Button variant="contained" color="primary" onClick={rematch} disabled={votedRematch}>
+                                            {votedRematch ? "Waiting for other player..." : "Rematch"}
+                                            {numVotes > 0 && ` (${numVotes}/2)`}
+                                        </Button>
+                                    )}
 
-                                <Box p={2}>
-                                    <div className="chessboard-container">
-                                        <div className="opponent-info">
-                                            <Typography variant="h6">{opponentName} (Opponent)</Typography>
-                                        </div>
-                                        <div className="chessboard">
-                                            {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
-                                                <div key={rowIndex} className="row">
-                                                    <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
-                                                    {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
-                                                        <>
-                                                            <div className="cell-3d" style={{ animationDelay: `${animationDelays[rowIndex][colIndex]}s` }}>
-                                                                <div
-                                                                    key={`${colIndex}-${rowIndex}-copy`}
-                                                                    className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black-copy' : 'white-copy'}`}
-                                                                    style={{ position: 'absolute', marginTop: '20px', zIndex: -1 }}
-                                                                >
+                                    <Box p={2}>
+                                        <div className="chessboard-container">
+                                            <div className="opponent-info">
+                                                <Typography variant="h6">{opponentName} (Opponent)</Typography>
+                                            </div>
+                                            <div className="chessboard">
+                                                {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
+                                                    <div key={rowIndex} className="row">
+                                                        <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
+                                                        {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
+                                                            <>
+                                                                <div className={`${selectedCell === cell ? 'cell-3d-selected' : 'cell-3d'}`} style={{ animationDelay: `${animationDelays[rowIndex][colIndex]}s` }}>
+                                                                    <div
+                                                                        key={`${colIndex}-${rowIndex}-copy`}
+                                                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black-copy' : 'white-copy'}`}
+                                                                        style={{ position: 'absolute', marginTop: '20px', zIndex: -1 }}
+                                                                    >
+                                                                    </div>
+                                                                    <RenderCell cell={cell} />
                                                                 </div>
-                                                                <div
-                                                                    key={`${colIndex}-${rowIndex}`}
-                                                                    className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
-                                                                    onClick={() => handleCellClick(cell)}
-                                                                    onMouseEnter={() => handleMouseEnter(cell)}
-                                                                    onMouseLeave={handleMouseLeave}
-                                                                    style={{ position: 'relative', color: `${cell.piece ? (cell.piece.color === colors.BLACK ? 'black' : 'white') : 'white'}` }}
-                                                                >
-                                                                    {cell.piece &&
-                                                                    (<div className={`color-indicator-${cell.piece.color === colors.BLACK ? 'black' : 'white'}`}></div>)
-                                                                    }
-                                                                    {loadingCell === cell && (
-                                                                        <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)', zIndex: 6 }} />
-                                                                    )}
-                                                                    <PieceComponent piece={cell.piece} />
-                                                                    {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (
-                                                                        <div className="highlight-circle move"></div>
-                                                                    )}
-                                                                    {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && (
-                                                                        <div className="highlight-circle attack"></div>
-                                                                    )}
-                                                                    {hoveredCell === cell && cell.piece && (
-                                                                        <div className="cell-popup">
-                                                                            {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
-
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </>
+                                                            </>
+                                                        ))}
+                                                    </div>
+                                                ))}
+                                                <div className="file-labels">
+                                                    {color === colors.WHITE ? files.map((file, index) => (
+                                                        <div key={index} className="file-label">{file}</div>
+                                                    )) : files.slice().reverse().map((file, index) => (
+                                                        <div key={index} className="file-label">{file}</div>
                                                     ))}
                                                 </div>
-                                            ))}
-                                            <div className="file-labels">
-                                                {color === colors.WHITE ? files.map((file, index) => (
-                                                    <div key={index} className="file-label">{file}</div>
-                                                )) : files.slice().reverse().map((file, index) => (
-                                                    <div key={index} className="file-label">{file}</div>
-                                                ))}
+                                            </div>
+                                            <div className="opponent-info">
+                                                <Typography variant="h6" style={{ marginTop: '20px' }}>{username} (You)</Typography>
                                             </div>
                                         </div>
-                                        <div className="opponent-info">
-                                            <Typography variant="h6" style={{marginTop: '20px'}}>{username} (You)</Typography>
-                                        </div>
-                                    </div>
-                                </Box>
-                                {selectedPiece && isYourTurn() && (
-                                    <Box>
-                                        <input
-                                            type="text"
-                                            value={pieceNameInput}
-                                            onChange={(e) => setPieceNameInput(e.target.value)}
-                                            placeholder="Rename selected piece"
-                                        />
-                                        <Button variant="contained" color="primary" onClick={handlePieceNameChange}>
-                                            Transform Piece
-                                        </Button>
                                     </Box>
-                                )}
+                                    {selectedPiece && isYourTurn() && (
+                                        <Box>
+                                            <input
+                                                type="text"
+                                                value={pieceNameInput}
+                                                onChange={(e) => setPieceNameInput(e.target.value)}
+                                                placeholder="Rename selected piece"
+                                            />
+                                            <Button variant="contained" color="primary" onClick={handlePieceNameChange}>
+                                                Transform Piece
+                                            </Button>
+                                        </Box>
+                                    )}
 
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </Box>
-
-                    {/* Piece Display (1/4 of the screen on the right) */}
-                    <div className="information-component">
-                        <Box flex={1} display="flex" justifyContent="center" alignItems="center">
-                            {previewedPiece && <PieceDisplay piece={previewedPiece} />}
                         </Box>
-                    </div>
-                </Box>
-            ) : <CircularProgress />}
-        </div>
+
+                        {/* Piece Display (1/4 of the screen on the right) */}
+                        <div className="information-component">
+                            <Box flex={1} display="flex" justifyContent="center" alignItems="center">
+                                {previewedPiece && <PieceDisplay piece={previewedPiece} />}
+                            </Box>
+                        </div>
+                    </Box>
+                ) : <CircularProgress />}
+            </div>
+        </DndProvider>
     );
 };
 

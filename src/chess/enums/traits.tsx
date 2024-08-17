@@ -5,7 +5,8 @@ enum traits {
     SELF_DESTRUCT,
     REFLECT,
     RADIUS,
-    MULTIATTACK
+    MULTIATTACK,
+    STATUS_EFFECT
 }
 
 export default traits;

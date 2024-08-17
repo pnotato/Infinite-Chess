@@ -4,6 +4,7 @@ import chesspiece from '../classes/chesspiece.tsx';
 import cell from '../classes/cell.tsx';
 import './chessboardComponent.css';
 import colors from '../enums/colors.tsx';
+import status from '../enums/status.tsx';
 import PieceComponent from './pieceComponent';
 import getResponse from '../helper-funcs/getResponse.tsx';
 import { io } from 'socket.io-client';
@@ -76,12 +77,10 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 setColor(prevColor => {
                     return colors.WHITE;
                 })
-                console.log("You are white");
             } else {
                 setColor(prevColor => {
                     return colors.BLACK;
                 })
-                console.log("You are black");
             }
 
             const newBoard = new chessboard();
@@ -163,19 +162,21 @@ const ChessboardComponent = ({ roomCode, username }) => {
         return color === currentTurn;
     };
 
+    
     const handleCellClick = (cell) => {
         let newBoard = board;
 
-        if (loadingCell) {
+        if (loadingCell || gameOver) {
             return;
         }
-
+    
         if (cell.piece) {
             setPreviewedPiece(cell.piece);
             console.log(cell.piece);
         }
-
+    
         if (selectedPiece && cell) {
+            // Ensure that selectedPiece and its statusEffects are defined before accessing them
             if (cell.piece && cell.piece.color === selectedPiece.color) {
                 selectPiece(cell);
             } else if (cell.piece && cell.piece.color !== selectedPiece.color && isYourTurn()) {
@@ -185,13 +186,14 @@ const ChessboardComponent = ({ roomCode, username }) => {
                     setSelectedCell(cell);
                     setGameOver(newBoard.isGameOver);
                     if (newBoard.isGameOver === true) {
-                        socket.emit('gameOver', { roomCode, winner: color });
-                        console.log("Game Over");
+                        setWinner(newBoard.winner);
+                        socket.emit('gameOver', { roomCode, winner: newBoard.winner });
+                        console.log("Game Over: " + newBoard.winner);
                     }
-
+    
                     socket.emit('changeTurn', { roomCode });
                 }
-
+    
                 deselectPiece();
             } else if (isYourTurn()) {
                 let moved = selectedPiece.move(cell.x, cell.y, newBoard);
@@ -210,7 +212,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 selectPiece(cell);
             }
         }
-
+    
         if (selectedCell !== cell) {
             setSelectedCell(cell);
         }
@@ -254,13 +256,19 @@ const ChessboardComponent = ({ roomCode, username }) => {
             const response = await getResponse(pieceNameInput);
             const data = JSON.parse(response);
 
+            let statusEffect = null;
+            if(data.statusEffect){
+                statusEffect = data.statusEffect;
+            }
+
             selectedPiece.updateInfo({
                 name: pieceNameInput,
                 emoji: data.emoji,
                 movement: data.movement,
                 attack: data.attack,
                 traits: data.traits,
-                description: ""
+                description: "",
+                statusEffect: statusEffect
             }, board);
 
             const storedPieces = JSON.parse(localStorage.getItem('createdPieces')) || [];
@@ -308,7 +316,14 @@ const ChessboardComponent = ({ roomCode, username }) => {
             }),
         }), [cell]);
 
-        const canDrag = cell.piece && cell.piece.color === color && isYourTurn() && !loadingCell;
+        const canDrag = cell.piece && cell.piece.color === color && isYourTurn() && !loadingCell && !gameOver;
+
+        const statusEffectEmojis = [];
+        if (cell.piece) {
+            cell.piece.statusEffects.forEach(status => {
+                statusEffectEmojis.push(status.emoji);
+            })
+        }
 
         return (
             <div
@@ -334,6 +349,11 @@ const ChessboardComponent = ({ roomCode, username }) => {
                         {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
                     </div>
                 )}
+                <div className="status-effects">
+                    {statusEffectEmojis.map(emoji => (
+                        <div className="status-effect">{emoji}</div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -360,7 +380,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                             <Grid container>
                                 <Grid item xs={12}>
                                     <Typography variant="h6" color={'white'}>
-                                        {gameOver ? "Game Over! You " + (winner ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
+                                        {gameOver ? "Game Over! You " + (winner === color ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
                                     </Typography>
 
                                     {gameOver && (

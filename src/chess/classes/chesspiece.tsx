@@ -1,5 +1,6 @@
 import colors from "../enums/colors.tsx";
 import traits from "../enums/traits.tsx";
+import status from "../enums/status.tsx";
 import chessboard from "./chessboard.tsx";
 
 class chesspiece {
@@ -21,10 +22,11 @@ class chesspiece {
     validMoves: { x: number, y: number }[];
     validAttacks: { x: number, y: number }[];
 
-    isKing: boolean;
+    statusEffects: { status: string[], name: string, emoji: string, duration: number }[];
+    givenStatusEffect: { status: string[], name: string, emoji: string, duration: number } | null;
 
     constructor(basic: { color: colors, position: { x: number, y: number } },
-        custom: { name: string, emoji: string, description: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }, isKing: boolean = false) {
+        custom: { name: string, emoji: string, description: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: traits[] }, statusEffects: { status: string[], name: string, emoji: string, duration: number }[] = []) {
 
         if (!basic || !custom) {
             return;
@@ -33,11 +35,12 @@ class chesspiece {
         this.color = basic.color;
         this.position = basic.position;
 
-        this.isKing = isKing;
-
         this.name = custom.name;
         this.emoji = custom.emoji;
         this.description = custom.description;
+
+        this.statusEffects = statusEffects;
+        this.givenStatusEffect = null;
 
         this.favourite = false;
 
@@ -54,7 +57,7 @@ class chesspiece {
     }
 
     // ------------------- Methods -------------------
-    updateInfo(custom: { name: string, emoji: string, description: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: string[] }, board: chessboard) {
+    updateInfo(custom: { name: string, emoji: string, description: string, movement: { x: number, y: number }[], attack: { x: number, y: number }[], traits: string[], statusEffect: { status: string[], name: string, emoji: string, duration: number } | null }, board: chessboard) {
         this.name = custom.name;
         this.emoji = custom.emoji;
         this.description = custom.description;
@@ -92,8 +95,13 @@ class chesspiece {
                 case "MULTIATTACK":
                     this.traits.push(traits.MULTIATTACK);
                     break;
+                case "STATUS_EFFECT":
+                    this.traits.push(traits.STATUS_EFFECT);
+                    break;
             }
         });
+
+        this.givenStatusEffect = custom.statusEffect;
 
         board.setPiece(null, this.position.x, this.position.y);
         board.setPiece(this, this.position.x, this.position.y);
@@ -178,13 +186,13 @@ class chesspiece {
         }
 
         console.log(`${this.color} ${this.name} destroyed!`);
-        if (this.isKing) {
+        if (this.statusEffects?.some((statusEffect) => statusEffect.status.includes("KING"))) {
             board.gameOver(this.color);
         }
     }
 
     move(x: number, y: number, board: chessboard) {
-        if (this.validMoves.some((move) => move.x === x && move.y === y)) {
+        if (this.validMoves.some((move) => move.x === x && move.y === y) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("FROZEN"))) {
             this.setPosition(x, y, board);
             return true;
         } else {
@@ -193,7 +201,7 @@ class chesspiece {
     }
 
     attack(target: chesspiece, board: chessboard) {
-        if (this.validAttacks.some((attack) => attack.x === target.position.x && attack.y === target.position.y)) {
+        if (this.validAttacks.some((attack) => attack.x === target.position.x && attack.y === target.position.y) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("FROZEN"))) {
             let targets = [target];
 
             if (this.traits.includes(traits.MULTIATTACK)) {
@@ -212,19 +220,26 @@ class chesspiece {
                     for (let i = -1; i <= 1; i++) {
                         for (let j = -1; j <= 1; j++) {
                             let piece = board.getPiece(currentTarget.position.x + i, currentTarget.position.y + j);
-                            if (piece && piece !== this) {
-                                piece.destroy(board);
+                            if (piece && piece !== this && !targets.includes(piece)) {
+                                targets.push(piece);
                             }
                         }
                     }
                 });
             }
 
-            targets.forEach((currentTarget) => {
-                currentTarget.destroy(board);
-            });
+            if (this.givenStatusEffect) {
+                // apply status effect to all targets
+                targets.forEach((currentTarget) => {
+                    currentTarget.statusEffects.push(this.givenStatusEffect!);
+                });
+            } else {
+                targets.forEach((currentTarget) => {
+                    currentTarget.destroy(board);
+                });
+            }
 
-            if (!this.traits.includes(traits.STATIONARY_ATTACK)) {
+            if (!this.traits.includes(traits.STATIONARY_ATTACK) && !this.traits.includes(traits.STATUS_EFFECT)) {
                 this.setPosition(target.position.x, target.position.y, board);
             }
 

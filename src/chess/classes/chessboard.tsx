@@ -1,7 +1,9 @@
 import cell from "./cell.tsx";
 import chesspiece from "./chesspiece.tsx";
 import colors from "../enums/colors.tsx";
+import status from "../enums/status.tsx";
 import info from "./constants/pieces.js";
+import { duration } from "@mui/material";
 
 class chessboard {
     cells: cell[][];
@@ -47,7 +49,7 @@ class chessboard {
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 3, y: 0 }},
             info['queen']), 3, 0);
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 4, y: 0 }},
-            info['king'], true), 4, 0);
+            info['king'], [{status: ["KING"], name: "King", emoji: "👑", duration: 0}]), 4, 0);
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 5, y: 0 }},
             info['bishop']), 5, 0);
         this.setPiece(new chesspiece({ color: colors.WHITE, position: { x: 6, y: 0 }},
@@ -70,7 +72,7 @@ class chessboard {
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 3, y: 7 }},
             info['queen']), 3, 7);
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 4, y: 7 }},
-            info['king'], true), 4, 7);
+            info['king'], [{status: ["KING"], name: "King", emoji: "👑", duration: 0}]), 4, 7);
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 5, y: 7 }},
             info['bishop']), 5, 7);
         this.setPiece(new chesspiece({ color: colors.BLACK, position: { x: 6, y: 7 }},

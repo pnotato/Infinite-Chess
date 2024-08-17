@@ -13,6 +13,7 @@ import socket from '../socket.js';
 import { Grid, Paper, Typography, Button, Drawer, Box, CircularProgress } from '@mui/material';
 
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 
 //random delays
@@ -164,7 +165,10 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
     const handleCellClick = (cell) => {
         let newBoard = board;
-        setSelectedCell(cell);
+
+        if (loadingCell) {
+            return;
+        }
 
         if (cell.piece) {
             setPreviewedPiece(cell.piece);
@@ -178,6 +182,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 let attacked = selectedPiece.attack(cell.piece, newBoard);
                 socket.emit('updateBoard', { roomCode, newBoard });
                 if (attacked) {
+                    setSelectedCell(cell);
                     setGameOver(newBoard.isGameOver);
                     if (newBoard.isGameOver === true) {
                         socket.emit('gameOver', { roomCode, winner: color });
@@ -192,6 +197,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 let moved = selectedPiece.move(cell.x, cell.y, newBoard);
                 socket.emit('updateBoard', { roomCode, newBoard });
                 if (moved) {
+                    setSelectedCell(cell);
                     socket.emit('changeTurn', { roomCode });
                 }
                 deselectPiece();
@@ -203,6 +209,13 @@ const ChessboardComponent = ({ roomCode, username }) => {
             if (cell.piece && cell.piece.color === color) {
                 selectPiece(cell);
             }
+        }
+
+        if (selectedCell !== cell) {
+            setSelectedCell(cell);
+        }
+        else {
+            setSelectedCell(null);
         }
     };
 
@@ -227,6 +240,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
     const deselectPiece = () => {
         setSelectedPiece(null);
+        setSelectedCell(null);
         setValidMoves([]);
         setValidAttacks([]);
 
@@ -246,7 +260,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 movement: data.movement,
                 attack: data.attack,
                 traits: data.traits,
-                description: data.description
+                description: ""
             }, board);
 
             const storedPieces = JSON.parse(localStorage.getItem('createdPieces')) || [];
@@ -280,6 +294,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
     function RenderCell({ cell }) {
         const [{ isDragging }, drag] = useDrag(() => ({
             type: 'PIECE',
+            item: { piece: cell.piece },
             collect: (monitor) => ({
                 isDragging: monitor.isDragging(),
             }),
@@ -293,6 +308,8 @@ const ChessboardComponent = ({ roomCode, username }) => {
             }),
         }), [cell]);
 
+        const canDrag = cell.piece && cell.piece.color === color && isYourTurn() && !loadingCell;
+
         return (
             <div
                 ref={drop}
@@ -305,17 +322,14 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 {cell.piece &&
                     (<div className={`color-indicator-${cell.piece.color === colors.BLACK ? 'black' : 'white'}`}></div>)
                 }
-                {loadingCell === cell && (
-                    <CircularProgress style={{ position: 'absolute', transform: 'translate(-50%, -50%)', zIndex: 6 }} />
-                )}
-                <PieceComponent piece={cell.piece} />
+                <PieceComponent piece={cell.piece} canDrag={canDrag} />
                 {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (
                     <div className="highlight-circle move"></div>
                 )}
                 {validAttacks.some(attack => attack.x === cell.x && attack.y === cell.y) && (
                     <div className="highlight-circle attack"></div>
                 )}
-                {hoveredCell === cell && cell.piece && (
+                {(hoveredCell === cell && cell.piece) && (
                     <div className="cell-popup">
                         {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
                     </div>
@@ -367,14 +381,17 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                                         <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
                                                         {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
                                                             <>
-                                                                <div className={`${selectedCell === cell ? 'cell-3d-selected' : 'cell-3d'}`} style={{ animationDelay: `${animationDelays[rowIndex][colIndex]}s` }}>
+                                                                <div className="cell-3d" style={{ animationDelay: `${animationDelays[rowIndex][colIndex]}s` }}>
                                                                     <div
                                                                         key={`${colIndex}-${rowIndex}-copy`}
                                                                         className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black-copy' : 'white-copy'}`}
-                                                                        style={{ position: 'absolute', marginTop: '20px', zIndex: -1 }}
+                                                                        style={{ position: 'absolute', marginTop: '30px', zIndex: -1 }}
                                                                     >
                                                                     </div>
                                                                     <RenderCell cell={cell} />
+                                                                    {loadingCell === cell && (
+                                                                        <CircularProgress style={{ position: 'absolute', top: '25%', left: '25%', zIndex: 6 }} />
+                                                                    )}
                                                                 </div>
                                                             </>
                                                         ))}
@@ -393,28 +410,27 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                             </div>
                                         </div>
                                     </Box>
-                                    {selectedPiece && isYourTurn() && (
-                                        <Box>
-                                            <input
-                                                type="text"
-                                                value={pieceNameInput}
-                                                onChange={(e) => setPieceNameInput(e.target.value)}
-                                                placeholder="Rename selected piece"
-                                            />
-                                            <Button variant="contained" color="primary" onClick={handlePieceNameChange}>
-                                                Transform Piece
-                                            </Button>
-                                        </Box>
-                                    )}
-
                                 </Grid>
                             </Grid>
                         </Box>
 
                         {/* Piece Display (1/4 of the screen on the right) */}
                         <div className="information-component">
-                            <Box flex={1} display="flex" justifyContent="center" alignItems="center">
+                            <Box flex={1} display="flex" flexDirection='column' justifyContent="center" alignItems="center">
                                 {previewedPiece && <PieceDisplay piece={previewedPiece} />}
+                                {selectedPiece && isYourTurn() && (
+                                    <Box display='flex' flexDirection='column'>
+                                        <input
+                                            type="text"
+                                            value={pieceNameInput}
+                                            onChange={(e) => setPieceNameInput(e.target.value)}
+                                            placeholder="Rename selected piece"
+                                        />
+                                        <Button variant="contained" color="primary" onClick={handlePieceNameChange}>
+                                            Transform Piece
+                                        </Button>
+                                    </Box>
+                                )}
                             </Box>
                         </div>
                     </Box>

@@ -2,10 +2,11 @@ import React from 'react';
 import { useDrag } from 'react-dnd';
 import './pieceComponent.css';
 
-const PieceComponent = ({ piece, setSelected }) => {
+const PieceComponent = ({ piece, canDrag }) => {
     const [{ isDragging }, drag] = useDrag(() => ({
         type: 'PIECE',
         item: { piece },
+        canDrag: canDrag,
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
@@ -17,7 +18,7 @@ const PieceComponent = ({ piece, setSelected }) => {
             className="piece"
             style={{
                 opacity: isDragging ? 0 : 1,
-                cursor: 'grab',
+                cursor: 'normal',
             }}
         >
             {piece ? piece.emoji : ''}

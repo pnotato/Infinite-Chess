@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import RoomPopup from './RoomPopup'; // Import the new RoomPopup component
+import RoomPopup from './RoomPopup.js'; // Import the new RoomPopup component
 import './lobby.css';
 import socket from './chess/socket';
 import RefreshIcon from '@mui/icons-material/Refresh';

@@ -35,10 +35,6 @@
   animation-fill-mode: both;
 }
 
-.cell-3d-selected {
-  color: white;
-}
-
 @keyframes float {
   0% {
     transform: translate(0, 0);
@@ -97,6 +93,7 @@
   margin-bottom: 60px;
   user-select: none;
   z-index: 4;
+  pointer-events: none;
 }
 
 .file-labels {
@@ -104,6 +101,7 @@
   margin-top: 5px;
   user-select: none;
   margin-left: 70px;
+  pointer-events: none;
 }
 
 .file-label {
@@ -148,13 +146,13 @@
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
-  pointer-events: none;
   z-index: 10;
   transform: translateX(-50%);
   top: -30px;
   left: 50%;
   white-space: nowrap;
   font-size: 12px;
+  pointer-events: none;
 }
 
 .piece-display, .piece-grid {
@@ -194,17 +192,11 @@
   flex-direction: column;
 
   align-items: center;
-
-
 }
 
 .piece-grid-item {
   user-select: none;
   margin: 5px;
-}
-
-.piece-grid-item :hover {
-  
 }
 
 .piece-list::-webkit-scrollbar {
@@ -213,8 +205,4 @@
 
 .display::-webkit-scrollbar {
   display: none;
-}
-
-.barracks-component, .information-component {
-  
 }

@@ -24,11 +24,16 @@ list of traits:
 - REFLECT -> when this piece is attacked, the attacker is also destroyed (e.g. for defensive pieces with retalitory damage like traps)
 - RADIUS -> the piece can attack in a radius around itself. Can destroy pieces of its own colour. (e.g. a bomb that explodes in a 3x3 area)
 - MULTIATTACK -> the piece automatically attacks all pieces in valid attack positions. Does not attack pieces of its own colour. (e.g a unit that can attack multiple times, or really quickly)
-- STATUS_EFFECT -> the piece applies a status effect to the attacked piece, instead of destroying it. (e.g. a piece that freezes the attacked piece). Template for status effect: { "status": ["FROZEN", "POISIONED"], "name": "Stuck in tar", emoji: "💩", "duration": 1 } (status is the status effect, duration is how many turns the status effect lasts. The name is a custom name you call the status effect, and the emoji is a custom representation of the status effect.)
-    > list of status effects:
-    - FROZEN -> the piece cannot move or attack
-    - BURNING -> the piece takes damage every turn
-    - POISIONED -> the piece takes damage every turn
+- STATUS_EFFECT -> the piece applies a status effect to the attacked piece, instead of destroying it. (e.g. a piece that freezes the attacked piece). In order to apply a status effect to another piece, it MUST be able to attack, as it uses the attack positions to apply the status effect. Template for status effect: { "status": ["FROZEN", "POISIONED"], "name": "Stuck in tar", emoji: "💩", "duration": 1 } (status is the status effect, duration is how many turns the status effect lasts. The name is a custom name you call the status effect, and the emoji is a custom representation of the status effect.)
+    > list of status effects: [
+    - IMMOBILE -> the piece cannot move or attack
+    - SHIELDED -> the piece can take one hit without being destroyed. This status effect is removed after being hit once.
+    - GOADED -> the piece can only attack, not move
+    - WEAKENED -> the piece can only move, not attack
+    - HASTED -> the piece can move twice in one turn
+    - CLEAR -> removes all status effects from the piece
+    ]
+- TARGET_ALLY -> the piece can target its own pieces. (e.g. a healer, or a piece that can buff other pieces)
     
 sample pieces for reference:
 - Knight:
@@ -70,8 +75,26 @@ sample pieces for reference:
     "emoji": "❄️",
     "movement": [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }],
     "attack": [{ x: 0, y: 1 }, { x: 0, y: 2 }, { x: 0, y: 3 }, { x: 0, y: 4 }], 
-    "traits": ["STATUS_EFFECT", "RADIUS"],
-    "statusEffect": { "status": ["FROZEN"], "name": "Frozen", "emoji": "❄️", "duration": 1 }
+    "traits": ["STATUS_EFFECT"],
+    "statusEffect": { "status": ["IMMOBILE"], "name": "Frozen", "emoji": "❄️", "duration": 1 }
+}
+
+- Large Forcefield:
+{
+    "emoji": "🛡️",
+    "movement": [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }],
+    "attack": [{ x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: -1, y: 0 }], 
+    "traits": ["STATUS_EFFECT", "TARGET_ALLY", "RADIUS"],
+    "statusEffect": { "status": ["SHIELDED"], "name": "Shielded", "emoji": "🛡️", "duration": 1 }
+}
+
+- Splash Potion of Swiftness:
+{
+    "emoji": "🧪",
+    "movement": [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }],
+    "attack": [{ x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: -1, y: 0 }],
+    "traits": ["STATUS_EFFECT", "TARGET_ALLY", "SELF_DESTRUCT", "RADIUS"],
+    "statusEffect": { "status": ["HASTED"], "name": "Hasted", "emoji": "⚡", "duration": 1 }
 }
 
 Be very creative with your pieces! Don't worry about trying to make the pieces balanced; an ant would be super weak and a thermonuclear bomb would be super strong. Pieces can be literally completely useless, or the most overpowered and broken piece in existance. The movement and attacks don't always need to be symmetrical; they can have fun and unique patterns. Not all pieces need to have traits. The movement, attacks, and traits should all deeply reflect the input string.

@@ -6,7 +6,8 @@ enum traits {
     REFLECT,
     RADIUS,
     MULTIATTACK,
-    STATUS_EFFECT
+    STATUS_EFFECT,
+    TARGET_ALLY,
 }
 
 export default traits;

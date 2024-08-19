@@ -98,6 +98,9 @@ class chesspiece {
                 case "STATUS_EFFECT":
                     this.traits.push(traits.STATUS_EFFECT);
                     break;
+                case "TARGET_ALLY":
+                    this.traits.push(traits.TARGET_ALLY);
+                    break;
             }
         });
 
@@ -134,8 +137,14 @@ class chesspiece {
             let x = this.position.x + attack.x;
             let y = this.position.y + attack.y;
 
-            if (x >= 0 && x < 8 && y >= 0 && y < 8 && board.getPiece(x, y) && board.getPiece(x, y)!.color !== this.color && (this.traits.includes(traits.IGNORE_BLOCKED_ATTACK) || !this.isBeingBlocked(x, y, board))) {
-                this.validAttacks.push({ x: x, y: y });
+            if (!this.traits.includes(traits.TARGET_ALLY)) {
+                if (x >= 0 && x < 8 && y >= 0 && y < 8 && board.getPiece(x, y) && board.getPiece(x, y)!.color !== this.color && (this.traits.includes(traits.IGNORE_BLOCKED_ATTACK) || !this.isBeingBlocked(x, y, board))) {
+                    this.validAttacks.push({ x: x, y: y });
+                }
+            } else {
+                if (x >= 0 && x < 8 && y >= 0 && y < 8 && board.getPiece(x, y) && board.getPiece(x, y)!.color === this.color && (this.traits.includes(traits.IGNORE_BLOCKED_ATTACK) || !this.isBeingBlocked(x, y, board))) {
+                    this.validAttacks.push({ x: x, y: y });
+                }
             }
         });
     }
@@ -172,28 +181,41 @@ class chesspiece {
     }
 
     destroy(board: chessboard) {
-        board.setPiece(null, this.position.x, this.position.y);
+        //board.setPiece(null, this.position.x, this.position.y);
+        let targets: chesspiece[];
+        targets = [this];
 
-        if (this.traits.includes(traits.RADIUS)) {
+        if (this.traits.includes(traits.RADIUS) && !this.traits.includes(traits.STATUS_EFFECT)) {
             for (let i = -1; i <= 1; i++) {
                 for (let j = -1; j <= 1; j++) {
                     let piece = board.getPiece(this.position.x + i, this.position.y + j);
                     if (piece && piece !== this) {
-                        piece.destroy(board);
+                        targets.push(piece);
                     }
                 }
             }
         }
 
-        console.log(`${this.color} ${this.name} destroyed!`);
-        if (this.statusEffects?.some((statusEffect) => statusEffect.status.includes("KING"))) {
-            board.gameOver(this.color);
-        }
+        targets.forEach((target) => {
+            if (target.statusEffects.some((statusEffect) => statusEffect.status.includes("SHIELDED"))) {
+                target.statusEffects = target.statusEffects.filter((statusEffect) => !statusEffect.status.includes("SHIELDED"));
+            }
+            else {
+                board.setPiece(null, target.position.x, target.position.y);
+                if (target.statusEffects.some((statusEffect) => statusEffect.status.includes("KING"))) {
+                    board.gameOver(target.color);
+                }
+            }
+        });
     }
 
     move(x: number, y: number, board: chessboard) {
-        if (this.validMoves.some((move) => move.x === x && move.y === y) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("FROZEN"))) {
+        if (this.validMoves.some((move) => move.x === x && move.y === y) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("IMMOBILE")) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("GOADED"))) {
             this.setPosition(x, y, board);
+            if (this.statusEffects.some((statusEffect) => statusEffect.status.includes("HASTED"))) {
+                this.statusEffects = this.statusEffects.filter((statusEffect) => !statusEffect.status.includes("HASTED"));
+                return false;
+            }
             return true;
         } else {
             return false;
@@ -201,7 +223,7 @@ class chesspiece {
     }
 
     attack(target: chesspiece, board: chessboard) {
-        if (this.validAttacks.some((attack) => attack.x === target.position.x && attack.y === target.position.y) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("FROZEN"))) {
+        if (this.validAttacks.some((attack) => attack.x === target.position.x && attack.y === target.position.y) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("IMMOBILE")) && !this.statusEffects.some((statusEffect) => statusEffect.status.includes("WEAKENED"))) {
             let targets = [target];
 
             if (this.traits.includes(traits.MULTIATTACK)) {
@@ -228,26 +250,49 @@ class chesspiece {
                 });
             }
 
+            let shouldMove = true;
+
+            if (target.statusEffects.some((statusEffect) => statusEffect.status.includes("SHIELDED"))) {
+                shouldMove = false;
+            }
+
             if (this.givenStatusEffect) {
+                // clear status effects from all targets, except for the king status effect
+                if (this.givenStatusEffect.status.includes("CLEAR")) {
+                    targets.forEach((currentTarget) => {
+                        currentTarget.statusEffects = currentTarget.statusEffects.filter((statusEffect) => statusEffect.status.includes("KING"));
+                    });
+                }
                 // apply status effect to all targets
-                targets.forEach((currentTarget) => {
-                    currentTarget.statusEffects.push(this.givenStatusEffect!);
-                });
+                else {
+                    targets.forEach((currentTarget) => {
+                        currentTarget.statusEffects.push(this.givenStatusEffect!);
+                    });
+                }
             } else {
                 targets.forEach((currentTarget) => {
                     currentTarget.destroy(board);
                 });
             }
 
-            if (!this.traits.includes(traits.STATIONARY_ATTACK) && !this.traits.includes(traits.STATUS_EFFECT)) {
+            if (this.traits.includes(traits.STATIONARY_ATTACK) || this.traits.includes(traits.STATUS_EFFECT)) {
+                shouldMove = false;
+            }
+
+            if (shouldMove) {
                 this.setPosition(target.position.x, target.position.y, board);
             }
 
             if (this.traits.includes(traits.SELF_DESTRUCT) || target.traits.includes(traits.REFLECT)) {
-                console.log("self destruct");
                 this.destroy(board);
             }
             this.getValidAttacks(board);
+
+            if (this.statusEffects.some((statusEffect) => statusEffect.status.includes("HASTED"))) {
+                this.statusEffects = this.statusEffects.filter((statusEffect) => !statusEffect.status.includes("HASTED"));
+                return false;
+            }
+
             return true;
         } else {
             return false;

@@ -177,9 +177,9 @@ const ChessboardComponent = ({ roomCode, username }) => {
     
         if (selectedPiece && cell) {
             // Ensure that selectedPiece and its statusEffects are defined before accessing them
-            if (cell.piece && cell.piece.color === selectedPiece.color) {
+            if (cell.piece && cell.piece.color === selectedPiece.color && !selectedPiece.traits.some(trait => trait === 8)) {
                 selectPiece(cell);
-            } else if (cell.piece && cell.piece.color !== selectedPiece.color && isYourTurn()) {
+            } else if (cell.piece && isYourTurn()) {
                 let attacked = selectedPiece.attack(cell.piece, newBoard);
                 socket.emit('updateBoard', { roomCode, newBoard });
                 if (attacked) {

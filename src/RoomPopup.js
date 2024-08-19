@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import './roomPopup.css';
 import socket from './chess/socket';
 import { useNavigate } from 'react-router-dom';
-
-//const socket = io('http://localhost:3000');
 
 function RoomPopup({ roomCode, isHost, username, startGame }) {
     const [roomInfo, setRoomInfo] = useState(null);

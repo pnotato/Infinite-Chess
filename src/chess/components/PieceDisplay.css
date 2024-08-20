@@ -24,9 +24,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(15, .75vw);
-  grid-template-rows: repeat(15, .75vw);
-  gap: 0vw;
+  grid-template-columns: repeat(15, .65vw);
+  grid-template-rows: repeat(15, .65vw);
   justify-content: center;
 }
 
@@ -35,6 +34,7 @@
   height: .75vw;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
+  border-radius: 2px;
 }
 
 .grid-cell.center {
@@ -42,9 +42,9 @@
 }
 
 .grid-cell.move {
-  background-color: rgba(0, 255, 0, 0.5); /* Green for movement */
+  background-color: rgb(1, 153, 1); /* Green for movement */
 }
 
 .grid-cell.attack {
-  background-color: rgba(255, 0, 0, 0.5); /* Red for attack */
+  background-color: rgb(194, 0, 0); /* Red for attack */
 }

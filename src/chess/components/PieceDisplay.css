@@ -24,8 +24,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(15, .65vw);
-  grid-template-rows: repeat(15, .65vw);
+  grid-template-columns: repeat(15, .6vw);
+  grid-template-rows: repeat(15, .6vw);
   justify-content: center;
 }
 
@@ -47,4 +47,10 @@
 
 .grid-cell.attack {
   background-color: rgb(194, 0, 0); /* Red for attack */
+}
+
+.status-effect-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const { spec } = require('node:test/reporters');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,6 +37,7 @@ io.on('connection', (socket) => {
             password: settings.password,
             allowSpectators: settings.allowSpectators,
             players: [],
+            spectators: [],
             board: null,
             rematchVotes: 0,
         };
@@ -48,10 +50,19 @@ io.on('connection', (socket) => {
     
 
     socket.on('joinRoom', ({ roomCode, username }) => {
-        if (rooms[roomCode] && rooms[roomCode].players.length <= 2) {
+        if (rooms[roomCode] && rooms[roomCode].players.length < 2) {
+            console.log('player joined:', username);
             socket.join(roomCode);
             rooms[roomCode].players.push({ id: socket.id, username });
  
+            io.to(roomCode).emit('joinedRoom', { room: rooms[roomCode] });
+            io.emit('roomsList', rooms);
+        }
+        else {
+            console.log('spectator joined:', username);
+            socket.join(roomCode);
+            rooms[roomCode].spectators.push({ id: socket.id, username });
+
             io.to(roomCode).emit('joinedRoom', { room: rooms[roomCode] });
             io.emit('roomsList', rooms);
         }

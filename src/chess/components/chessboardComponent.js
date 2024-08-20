@@ -42,6 +42,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
     const [refreshGrid, setRefreshGrid] = useState(false);
     const [loadingCell, setLoadingCell] = useState(null);
     const [opponentName, setOpponentName] = useState(null);
+    const [isSpectator, setIsSpectator] = useState(false);
 
     let id = null;
 
@@ -49,6 +50,10 @@ const ChessboardComponent = ({ roomCode, username }) => {
         if (roomInfo && opponentName === null) {
             const opponent = roomInfo.players.find(player => player.username !== username);
             setOpponentName(opponent.username);
+        }
+
+        if (roomInfo && roomInfo.spectators.some(spectator => spectator.username === username)) {
+            setIsSpectator(true);
         }
     }, [roomInfo]);
 
@@ -73,13 +78,23 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
             setPieceNameInput("");
 
-            if (turn === id) {
+            if (!isSpectator) {
+                if (turn === id) {
+                    setColor(prevColor => {
+                        console.log("White");
+                        return colors.WHITE;
+                    })
+                } else {
+                    setColor(prevColor => {
+                        console.log("Black");
+                        return colors.BLACK;
+                    })
+                }
+            }
+            else {
                 setColor(prevColor => {
-                    return colors.WHITE;
-                })
-            } else {
-                setColor(prevColor => {
-                    return colors.BLACK;
+                    console.log("Spectator");
+                    return colors.SPECTATOR;
                 })
             }
 
@@ -126,7 +141,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
         });
 
         socket.emit('getID', {});
-        socket.emit('joinRoom', { roomCode, username });
+        //socket.emit('joinRoom', { roomCode, username });
         socket.emit('loadedRoom', { roomCode });
 
         return () => {
@@ -162,19 +177,19 @@ const ChessboardComponent = ({ roomCode, username }) => {
         return color === currentTurn;
     };
 
-    
+
     const handleCellClick = (cell) => {
         let newBoard = board;
 
         if (loadingCell || gameOver) {
             return;
         }
-    
+
         if (cell.piece) {
             setPreviewedPiece(cell.piece);
             console.log(cell.piece);
         }
-    
+
         if (selectedPiece && cell) {
             // Ensure that selectedPiece and its statusEffects are defined before accessing them
             if (cell.piece && cell.piece.color === selectedPiece.color && !selectedPiece.traits.some(trait => trait === 8)) {
@@ -190,10 +205,10 @@ const ChessboardComponent = ({ roomCode, username }) => {
                         socket.emit('gameOver', { roomCode, winner: newBoard.winner });
                         console.log("Game Over: " + newBoard.winner);
                     }
-    
+
                     socket.emit('changeTurn', { roomCode });
                 }
-    
+
                 deselectPiece();
             } else if (isYourTurn()) {
                 let moved = selectedPiece.move(cell.x, cell.y, newBoard);
@@ -212,7 +227,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 selectPiece(cell);
             }
         }
-    
+
         if (selectedCell !== cell) {
             setSelectedCell(cell);
         }
@@ -257,7 +272,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
             const data = JSON.parse(response);
 
             let statusEffect = null;
-            if(data.statusEffect){
+            if (data.statusEffect) {
                 statusEffect = data.statusEffect;
             }
 
@@ -380,7 +395,9 @@ const ChessboardComponent = ({ roomCode, username }) => {
                             <Grid container>
                                 <Grid item xs={12}>
                                     <Typography variant="h6" color={'white'}>
-                                        {gameOver ? "Game Over! You " + (winner === color ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn")}
+                                        {isSpectator ? "Spectating" :
+                                            (gameOver ? "Game Over! You " + (winner === color ? "Win!" : "Lose") : "Current Turn: " + (color === currentTurn ? "Your Turn" : "Opponent's Turn"))
+                                        }
                                     </Typography>
 
                                     {gameOver && (
@@ -398,14 +415,14 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                             <div className="chessboard">
                                                 {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
                                                     <div key={rowIndex} className="row">
-                                                        <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div>
+                                                        {/* <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div> */}
                                                         {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
                                                             <>
                                                                 <div className="cell-3d" style={{ animationDelay: `${animationDelays[rowIndex][colIndex]}s` }}>
                                                                     <div
                                                                         key={`${colIndex}-${rowIndex}-copy`}
                                                                         className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black-copy' : 'white-copy'}`}
-                                                                        style={{ position: 'absolute', marginTop: '30px', zIndex: -1 }}
+                                                                        style={{ position: 'absolute', marginTop: '1vw', zIndex: -1 }}
                                                                     >
                                                                     </div>
                                                                     <RenderCell cell={cell} />
@@ -417,13 +434,13 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                                         ))}
                                                     </div>
                                                 ))}
-                                                <div className="file-labels">
+                                                {/* <div className="file-labels">
                                                     {color === colors.WHITE ? files.map((file, index) => (
                                                         <div key={index} className="file-label">{file}</div>
                                                     )) : files.slice().reverse().map((file, index) => (
                                                         <div key={index} className="file-label">{file}</div>
                                                     ))}
-                                                </div>
+                                                </div> */}
                                             </div>
                                             <div className="opponent-info">
                                                 <Typography variant="h6" style={{ marginTop: '20px' }}>{username} (You)</Typography>

@@ -34,14 +34,14 @@ function PieceGridItem({ piece, onClick, onRefresh }) {
 
     return (
         <div className="piece-grid-item" onClick={onClick}>
-            <Paper align='center' elevation={0} style={{ width: '100px', borderRadius:'15px'}}>
-                <Button onClick={addToFavorites}>
+            <Paper align='center' elevation={0} style={{ width: '75px', height: '75px', borderRadius: '15px', display: 'flex', flexDirection: 'column' }}>
+                <Typography fontSize={"50px"} style={{ position: 'absolute', alignContent: 'center'}}>{piece.emoji}</Typography>
+                <Button onClick={addToFavorites} style={{ top: '-5px', right: '-25px' }}>
                     {isFavorite ? <StarIcon /> : <StarBorderIcon />}
                 </Button>
-                <Typography fontSize={30} align="center">{piece.emoji}</Typography>
-                <Typography align='center'>
+                {/* <Typography align='center'>
                     {piece.name.length > 10 ? piece.name.slice(0, 7) + '...' : piece.name}
-                </Typography>
+                </Typography> */}
             </Paper>
         </div>
     );

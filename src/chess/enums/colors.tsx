@@ -1,6 +1,7 @@
 enum colors {
     WHITE,
-    BLACK
+    BLACK,
+    SPECTATOR
 }
 
 export default colors;

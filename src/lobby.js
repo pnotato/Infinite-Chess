@@ -31,7 +31,7 @@ function Lobby() {
 
     const joinRoom = (roomCode) => {
         if (username) {
-            if (rooms[roomCode].players.length < 2) {
+            if (rooms[roomCode].allowSpectators || rooms[roomCode].players.length < 2) {
                 setCurrentRoom({ roomCode, isHost: false });
             } else {
                 alert('Room is full');

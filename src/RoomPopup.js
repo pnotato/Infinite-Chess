@@ -40,6 +40,12 @@ function RoomPopup({ roomCode, isHost, username, startGame }) {
                             <li key={index}>{player.username}</li>
                         ))}
                     </ul>
+                    <h3>Spectators:</h3>
+                    <ul>
+                        {roomInfo.spectators ? roomInfo.spectators.map((spectator, index) => (
+                            <li key={index}>{spectator.username}</li>
+                        )) : ""}
+                    </ul>
                     {isHost && roomInfo.players.length > 1 && (
                         <button onClick={() => startGame(roomCode)}>Start Game</button>
                     )}

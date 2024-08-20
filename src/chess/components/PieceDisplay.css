@@ -1,5 +1,5 @@
 .piece-info {
-  font-size: 16px;
+  font-size: 1vw;
   line-height: 1.5;
   color: white;
 }
@@ -7,8 +7,8 @@
 .grid-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 10vh;
+  gap: 1vw;
+  margin-top: 1vw;
 }
 
 .grid-container.flipped .grid {
@@ -19,19 +19,20 @@
   text-align: center;
   font-weight: bold;
   color: white;
+  font-size: 1vw;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(15, 10px);
-  grid-template-rows: repeat(15, 10px);
-  gap: 2px;
+  grid-template-columns: repeat(15, .75vw);
+  grid-template-rows: repeat(15, .75vw);
+  gap: 0vw;
   justify-content: center;
 }
 
 .grid-cell {
-  width: 10px;
-  height: 10px;
+  width: .75vw;
+  height: .75vw;
   border: 1px solid #ddd;
   background-color: #f9f9f9;
 }

@@ -26,9 +26,11 @@ function PieceGrid({ onPieceClick, refreshGrid, setRefreshGrid }) {
 
     return (
         <div className='piece-grid'>
-            <Typography variant="h6" align="center" sx={{color: 'white'}}>Barracks</Typography>
+            <Typography fontSize={"2vw"} variant="h6" align="center" sx={{ color: 'white' }}>Barracks</Typography>
             <Button onClick={() => setIsFiltered(!isFiltered)}>
-                {isFiltered ? 'Show All' : 'Show Favorites'}
+                <Typography fontSize={"1vw"} align="center" sx={{ color: 'white' }}>
+                    {isFiltered ? 'Show All' : 'Show Favorites'}
+                </Typography>
             </Button>
 
             <div className="piece-list">

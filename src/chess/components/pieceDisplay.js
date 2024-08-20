@@ -38,9 +38,9 @@ function PieceDisplay({ piece }) {
 
   return (
     <div className="piece-display">
-      <Typography variant="h6" align="center" sx={{color: 'white'}}>Information</Typography>
+      <Typography fontSize={"2vw"} variant="h6" align="center" sx={{color: 'white'}}>Information</Typography>
       <div className="display">
-        <Typography fontSize={50} align="center">
+        <Typography fontSize={"5vw"} align="center">
           {rehydratedPiece.emoji}
         </Typography>
         <div className="grid-title">{rehydratedPiece.name}</div>

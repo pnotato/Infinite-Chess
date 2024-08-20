@@ -29,18 +29,23 @@ io.on('connection', (socket) => {
         socket.emit('roomsList', rooms);
     });
 
-    socket.on('createRoom', ({ username }) => {
+    socket.on('createRoom', ({ username, settings }) => {
         const roomCode = `room-${Math.floor(Math.random() * 10000)}`;
         rooms[roomCode] = {
-            name: (username + "'s Room"),
+            name: settings.roomName || (username + "'s Room"),
+            password: settings.password,
+            allowSpectators: settings.allowSpectators,
             players: [],
             board: null,
             rematchVotes: 0,
         };
 
+        console.log('room created:', rooms[roomCode].name);
+    
         io.to(socket.id).emit('roomCreated', { roomCode });
         io.emit('roomsList', rooms);
     });
+    
 
     socket.on('joinRoom', ({ roomCode, username }) => {
         if (rooms[roomCode] && rooms[roomCode].players.length <= 2) {

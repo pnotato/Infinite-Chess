@@ -59,6 +59,8 @@ function PieceDisplay({ piece }) {
         return 'Gives Status Effects';
       case 8:
         return 'Targets Allies';
+      case 9:
+        return 'Summoner';
       default:
         return 'Unknown';
     }
@@ -69,14 +71,15 @@ function PieceDisplay({ piece }) {
       <Typography fontSize={"1.5vw"} variant="h6" align="center" sx={{ color: 'white' }}>Information</Typography>
       <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }} />
       <div className="display">
-        <Typography fontSize={"5vw"} style={{ margin: '-1vw' }} align="center">
+        <Typography fontSize={"5vw"} style={{}} align="center">
           {rehydratedPiece.emoji}
         </Typography>
         <div className="grid-title">{rehydratedPiece.name}</div>
-        <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }} />
-        <IconButton onClick={() => setExpanded(!expanded)} align='center' sx={{ color: 'black', opacity: 0.25, width: '2vw', height: '2vw' }}>
-          <ExpandMoreIcon />
-        </IconButton>
+        <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }} >
+          <IconButton onClick={() => setExpanded(!expanded)} align='center' sx={{ color: 'white', opacity: 0.25, width: '2vw', height: '2vw' }}>
+            <ExpandMoreIcon />
+          </IconButton>
+        </Divider>
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <div className="traits-container">
@@ -102,7 +105,7 @@ function PieceDisplay({ piece }) {
               ))}
             </div>
           </div>
-          <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }} />
+          <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5, marginY: '1vw' }} />
         </Collapse>
 
         <div className={`grid-container`}>

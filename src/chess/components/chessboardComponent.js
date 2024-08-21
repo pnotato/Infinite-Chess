@@ -194,8 +194,8 @@ const ChessboardComponent = ({ roomCode, username }) => {
             // Ensure that selectedPiece and its statusEffects are defined before accessing them
             if (cell.piece && cell.piece.color === selectedPiece.color && !selectedPiece.traits.some(trait => trait === 8)) {
                 selectPiece(cell);
-            } else if (cell.piece && isYourTurn()) {
-                let attacked = selectedPiece.attack(cell.piece, newBoard);
+            } else if ((cell.piece || selectedPiece.traits.some(trait => trait === 9)) && isYourTurn()) {
+                let attacked = selectedPiece.attack(cell, newBoard);
                 socket.emit('updateBoard', { roomCode, newBoard });
                 if (attacked) {
                     setSelectedCell(cell);
@@ -276,6 +276,14 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 statusEffect = data.statusEffect;
             }
 
+            let summonedPiece = null;
+            if(data.summonedPiece) {
+                const response2 = await getResponse(data.summonedPiece);
+                const data2 = JSON.parse(response2);
+                summonedPiece = data2;
+                summonedPiece.name = data.summonedPiece;
+            }
+
             selectedPiece.updateInfo({
                 name: pieceNameInput,
                 emoji: data.emoji,
@@ -283,7 +291,8 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 attack: data.attack,
                 traits: data.traits,
                 description: "",
-                statusEffect: statusEffect
+                statusEffect: statusEffect,
+                summonedPiece: summonedPiece
             }, board);
 
             const storedPieces = JSON.parse(localStorage.getItem('createdPieces')) || [];

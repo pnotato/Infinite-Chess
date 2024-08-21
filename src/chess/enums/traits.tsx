@@ -8,6 +8,7 @@ enum traits {
     MULTIATTACK,
     STATUS_EFFECT,
     TARGET_ALLY,
+    SUMMONER
 }
 
 export default traits;

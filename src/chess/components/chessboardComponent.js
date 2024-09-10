@@ -16,6 +16,7 @@ import { Grid, Paper, Typography, Button, Drawer, Box, CircularProgress } from '
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import zIndex from '@mui/material/styles/zIndex';
 
 //random delays
 const animationDelays = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => Math.random() * 5));
@@ -463,9 +464,9 @@ const ChessboardComponent = ({ roomCode, username }) => {
                         {/* Piece Display (1/4 of the screen on the right) */}
                         <div className="information-component">
                             <Box flex={1} display="flex" flexDirection='column' justifyContent="center" alignItems="center">
-                                {previewedPiece && <PieceDisplay piece={previewedPiece} />}
-                                {selectedPiece && isYourTurn() && (
-                                    <Box display='flex' flexDirection='column'>
+                                {previewedPiece && <PieceDisplay piece={previewedPiece} rename={setPieceNameInput} handlePieceNameChange={handlePieceNameChange} />}
+                                {/* {selectedPiece && isYourTurn() && (
+                                    <Box display='flex' position='absolute' flexDirection='column' style={{ zIndex: '5', top: '35vh'}}>
                                         <input
                                             type="text"
                                             value={pieceNameInput}
@@ -476,7 +477,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                             Transform Piece
                                         </Button>
                                     </Box>
-                                )}
+                                )} */}
                             </Box>
                         </div>
                     </Box>

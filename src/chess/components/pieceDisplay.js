@@ -1,19 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './PieceDisplay.css';
 import './chessboardComponent.css';
-import { Typography, Divider, Collapse, IconButton, Chip } from '@mui/material';
+import { Typography, Divider, Collapse, IconButton, Chip, Box } from '@mui/material';
 import chesspiece from '../classes/chesspiece.tsx';
 import colors from '../enums/colors.tsx';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 
-function PieceDisplay({ piece }) {
-  const [expanded, setExpanded] = React.useState(false);
+function PieceDisplay({ piece, rename, handlePieceNameChange }) {
+  const [expanded, setExpanded] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState(piece?.name || '');
 
   if (!piece) {
     return <div className="piece-display">No piece selected</div>;
   }
 
   const rehydratedPiece = Object.assign(new chesspiece(), piece);
+
+  const handleEditClick = () => {
+    setIsEditingName(true);
+  };
+
+  const handleNameChange = (e) => {
+    setNewName(e.target.value);
+    rename(e.target.value);
+  };
+
+  const handleNameSubmit = () => {
+    rename(newName);
+    setIsEditingName(false);
+    handlePieceNameChange();
+  };
 
   const renderRelativeGrid = (pattern, type) => {
     const grid = [];
@@ -64,18 +83,41 @@ function PieceDisplay({ piece }) {
       default:
         return 'Unknown';
     }
-  }
+  };
 
   return (
     <div className="piece-display">
       <Typography fontSize={"1.5vw"} variant="h6" align="center" sx={{ color: 'white' }}>Information</Typography>
       <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }} />
       <div className="display">
-        <Typography fontSize={"5vw"} style={{}} align="center">
+        <Typography fontSize={"5vw"} align="center">
           {rehydratedPiece.emoji}
         </Typography>
-        <div className="grid-title">{rehydratedPiece.name}</div>
-        <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }} >
+
+        <div className="grid-title">
+          {isEditingName ? (
+            <>
+              <input
+                type="text"
+                value={newName}
+                onChange={handleNameChange}
+                autoFocus
+              />
+              <IconButton onClick={handleNameSubmit} sx={{ color: 'white', padding: 0 }}>
+                <CheckIcon />
+              </IconButton>
+            </>
+          ) : (
+            <>
+              {rehydratedPiece.name}
+              <IconButton onClick={handleEditClick} sx={{ color: 'white', padding: 0 }}>
+                <EditIcon />
+              </IconButton>
+            </>
+          )}
+        </div>
+
+        <Divider variant='middle' sx={{ borderRadius: '5px', borderBottomWidth: 5 }}>
           <IconButton onClick={() => setExpanded(!expanded)} align='center' sx={{ color: 'white', opacity: 0.25, width: '2vw', height: '2vw' }}>
             <ExpandMoreIcon />
           </IconButton>
@@ -93,7 +135,7 @@ function PieceDisplay({ piece }) {
             <div className='status-effect-display'>
               {rehydratedPiece.statusEffects && rehydratedPiece.statusEffects.length > 0 && <Typography fontSize={"1vw"} align="center" sx={{ color: 'white' }}>Status Effects</Typography>}
               {rehydratedPiece.statusEffects && rehydratedPiece.statusEffects.length > 0 && rehydratedPiece.statusEffects.map((effect, index) => (
-                <div>
+                <div key={index}>
                   <div className='status-effect-name'>
                     <Typography key={index} fontSize={"1vw"} align="center" sx={{ color: 'white' }}>{effect.emoji}</Typography>
                     <Typography key={index} fontSize={".75vw"} align="center" sx={{ color: 'white' }}>{effect.name}</Typography>

@@ -1,5 +1,3 @@
-import traits from "../../enums/traits.tsx"
-
 let pawnInfo = {
     name: 'Pawn',
     emoji: '♟',
@@ -25,7 +23,7 @@ let knightInfo = {
     emoji: '♞',
     movement: [{ x: 1, y: 2 }, { x: -1, y: 2 }, { x: 1, y: -2 }, { x: -1, y: -2 }, { x: 2, y: 1 }, { x: -2, y: 1 }, { x: 2, y: -1 }, { x: -2, y: -1 }],
     attack: [{ x: 1, y: 2 }, { x: -1, y: 2 }, { x: 1, y: -2 }, { x: -1, y: -2 }, { x: 2, y: 1 }, { x: -2, y: 1 }, { x: 2, y: -1 }, { x: -2, y: -1 }],
-    traits: [traits.IGNORE_BLOCKED_ATTACK, traits.IGNORE_BLOCKED_MOVE],
+    traits: ['IGNORE_BLOCKED_ATTACK', 'IGNORE_BLOCKED_MOVE'],
     description: ''
 }
 

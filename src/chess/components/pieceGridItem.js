@@ -2,7 +2,7 @@ import { Typography, Paper, Button } from "@mui/material";
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import { useEffect, useState } from "react";
-import chesspiece from "../classes/chesspiece.tsx";
+import chesspiece from "../classes/chesspiece.js";
 
 function PieceGridItem({ piece, onClick, onRefresh }) {
     const [isFavorite, setIsFavorite] = useState(piece.favourite);

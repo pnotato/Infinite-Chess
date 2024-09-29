@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import chessboard from '../classes/chessboard.tsx';
-import chesspiece from '../classes/chesspiece.tsx';
-import cell from '../classes/cell.tsx';
+import chessboard from '../classes/chessboard.js';
+import chesspiece from '../classes/chesspiece.js';
+import cell from '../classes/cell.js';
 import './chessboardComponent.css';
-import colors from '../enums/colors.tsx';
-import status from '../enums/status.tsx';
 import PieceComponent from './pieceComponent';
 import getResponse from '../helper-funcs/getResponse.tsx';
-import { io } from 'socket.io-client';
 import PieceDisplay from './pieceDisplay.js';
 import PieceGrid from './pieceGrid.js';
 import socket from '../socket.js';
 import { Grid, Paper, Typography, Button, Drawer, Box, CircularProgress } from '@mui/material';
 
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import zIndex from '@mui/material/styles/zIndex';
 
 //random delays
 const animationDelays = Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => Math.random() * 5));
@@ -34,7 +29,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
     const [pieceNameInput, setPieceNameInput] = useState("");
     const [roomInfo, setRoomInfo] = useState(null);
     const [color, setColor] = useState(null);
-    const [currentTurn, setCurrentTurn] = useState(colors.WHITE);
+    const [currentTurn, setCurrentTurn] = useState('WHITE');
     const [gameOver, setGameOver] = useState(false);
     const [winner, setWinner] = useState(null);
     const [votedRematch, setVotedRematch] = useState(false);
@@ -70,7 +65,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
             setVotedRematch(false);
             setGameOver(false);
             setWinner(null);
-            setCurrentTurn(colors.WHITE);
+            setCurrentTurn('WHITE');
             setNumVotes(0);
             setSelectedCell(null);
             setSelectedPiece(null);
@@ -83,19 +78,19 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 if (turn === id) {
                     setColor(prevColor => {
                         console.log("White");
-                        return colors.WHITE;
+                        return 'WHITE';
                     })
                 } else {
                     setColor(prevColor => {
                         console.log("Black");
-                        return colors.BLACK;
+                        return 'BLACK';
                     })
                 }
             }
             else {
                 setColor(prevColor => {
                     console.log("Spectator");
-                    return colors.SPECTATOR;
+                    return 'SPECTATOR';
                 })
             }
 
@@ -119,7 +114,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
         socket.on('changeTurn', () => {
             setCurrentTurn(prevTurn => {
-                const newTurn = prevTurn === colors.WHITE ? colors.BLACK : colors.WHITE;
+                const newTurn = prevTurn === 'WHITE' ? 'BLACK': 'WHITE';
                 return newTurn;
             });
         });
@@ -193,9 +188,9 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
         if (selectedPiece && cell) {
             // Ensure that selectedPiece and its statusEffects are defined before accessing them
-            if (cell.piece && cell.piece.color === selectedPiece.color && !selectedPiece.traits.some(trait => trait === 8)) {
+            if (cell.piece && cell.piece.color === selectedPiece.color && !selectedPiece.traits.some(trait => trait === 'TARGET_ALLY')) {
                 selectPiece(cell);
-            } else if ((cell.piece || selectedPiece.traits.some(trait => trait === 9)) && isYourTurn()) {
+            } else if ((cell.piece || selectedPiece.traits.some(trait => trait === 'SUMMONER')) && isYourTurn()) {
                 let attacked = selectedPiece.attack(cell, newBoard);
                 socket.emit('updateBoard', { roomCode, newBoard });
                 if (attacked) {
@@ -345,7 +340,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
 
         const statusEffectEmojis = [];
         if (cell.piece) {
-            cell.piece.statusEffects.forEach(status => {
+            cell.piece.statusEffects?.forEach(status => {
                 statusEffectEmojis.push(status.emoji);
             })
         }
@@ -353,14 +348,14 @@ const ChessboardComponent = ({ roomCode, username }) => {
         return (
             <div
                 ref={drop}
-                className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black' : 'white'}`}
+                className={`cell cell-${cell.x}-${cell.y} ${cell.color === 'BLACK' ? 'black' : 'white'}`}
                 onMouseDown={() => handleCellClick(cell)}
                 onMouseEnter={() => handleMouseEnter(cell)}
                 onMouseLeave={handleMouseLeave}
-                style={{ position: 'relative', color: `${cell.piece ? (cell.piece.color === colors.BLACK ? 'black' : 'white') : 'white'}` }}
+                style={{ position: 'relative', color: `${cell.piece ? (cell.piece.color === 'BLACK' ? 'black' : 'white') : 'white'}` }}
             >
                 {cell.piece &&
-                    (<div className={`color-indicator-${cell.piece.color === colors.BLACK ? 'black' : 'white'}`}></div>)
+                    (<div className={`color-indicator-${cell.piece.color === 'BLACK' ? 'black' : 'white'}`}></div>)
                 }
                 <PieceComponent piece={cell.piece} canDrag={canDrag} />
                 {validMoves.some(move => move.x === cell.x && move.y === cell.y) && (
@@ -371,7 +366,7 @@ const ChessboardComponent = ({ roomCode, username }) => {
                 )}
                 {(hoveredCell === cell && cell.piece) && (
                     <div className="cell-popup">
-                        {`${cell.piece.color === colors.BLACK ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
+                        {`${cell.piece.color === 'BLACK' ? "Black" : "White"} ${cell.piece.name} (${cell.x}, ${cell.y})`}
                     </div>
                 )}
                 <div className="status-effects">
@@ -423,15 +418,15 @@ const ChessboardComponent = ({ roomCode, username }) => {
                                                 <Typography variant="h6">{opponentName} (Opponent)</Typography>
                                             </div>
                                             <div className="chessboard">
-                                                {(color === colors.WHITE ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
+                                                {(color === 'WHITE' ? transposedBoard.slice().reverse() : transposedBoard).map((row, rowIndex) => (
                                                     <div key={rowIndex} className="row">
                                                         {/* <div className="rank-label">{color === colors.WHITE ? 8 - rowIndex : rowIndex + 1}</div> */}
-                                                        {(color === colors.WHITE ? row : row.slice().reverse()).map((cell, colIndex) => (
+                                                        {(color === 'WHITE' ? row : row.slice().reverse()).map((cell, colIndex) => (
                                                             <>
                                                                 <div className="cell-3d" style={{ animationDelay: `${animationDelays[rowIndex][colIndex]}s` }}>
                                                                     <div
                                                                         key={`${colIndex}-${rowIndex}-copy`}
-                                                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === colors.BLACK ? 'black-copy' : 'white-copy'}`}
+                                                                        className={`cell cell-${cell.x}-${cell.y} ${cell.color === 'BLACK' ? 'black-copy' : 'white-copy'}`}
                                                                         style={{ position: 'absolute', marginTop: '1vw', zIndex: -1 }}
                                                                     >
                                                                     </div>

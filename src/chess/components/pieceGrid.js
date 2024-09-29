@@ -1,7 +1,7 @@
 import { Grid, Typography, Button, Box, Divider, TextField, InputAdornment } from '@mui/material';
 import PieceGridItem from './pieceGridItem';
 import { useState, useEffect } from 'react';
-import chesspiece from '../classes/chesspiece.tsx';
+import chesspiece from '../classes/chesspiece.js';
 import './chessboardComponent.css';
 import SearchIcon from '@mui/icons-material/Search';
 

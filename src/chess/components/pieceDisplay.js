@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import './PieceDisplay.css';
 import './chessboardComponent.css';
 import { Typography, Divider, Collapse, IconButton, Chip, Box } from '@mui/material';
-import chesspiece from '../classes/chesspiece.tsx';
-import colors from '../enums/colors.tsx';
+import chesspiece from '../classes/chesspiece.js';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
@@ -43,8 +42,8 @@ function PieceDisplay({ piece, rename, handlePieceNameChange }) {
       for (let x = 0; x < 15; x++) {
         const isInPattern = pattern.some(pos =>
           // flip if piece is black
-          (rehydratedPiece.color === colors.BLACK ? -pos.x : pos.x) + centerX === x &&
-          (rehydratedPiece.color === colors.BLACK ? -pos.y : pos.y) + centerY === y
+          (rehydratedPiece.color === 'BLACK' ? -pos.x : pos.x) + centerX === x &&
+          (rehydratedPiece.color === 'BLACK' ? -pos.y : pos.y) + centerY === y
         );
 
         grid.push(
@@ -58,27 +57,27 @@ function PieceDisplay({ piece, rename, handlePieceNameChange }) {
     return grid;
   };
 
-  const numToTrait = (num) => {
-    switch (num) {
-      case 0:
+  const strToTrait = (str) => {
+    switch (str) {
+      case 'IGNORE_BLOCKED_ATTACK':
         return 'Ignores Blocked Attacks';
-      case 1:
+      case 'IGNORE_BLOCKED_MOVE':
         return 'Ignores Blocked Moves';
-      case 2:
+      case 'STATIONARY_ATTACK':
         return 'Attacks in place';
-      case 3:
+      case 'SELF_DESTRUCT':
         return 'Self Destructs';
-      case 4:
+      case 'REFLECT':
         return 'Reflects Attacks';
-      case 5:
+      case 'RADIUS':
         return 'Attacks in Radius';
-      case 6:
+      case 'MULTIATTACK':
         return 'Multiattacks';
-      case 7:
+      case 'STATUS_EFFECT':
         return 'Gives Status Effects';
-      case 8:
+      case 'TARGET_ALLY':
         return 'Targets Allies';
-      case 9:
+      case 'SUMMONER':
         return 'Summoner';
       default:
         return 'Unknown';
@@ -129,7 +128,7 @@ function PieceDisplay({ piece, rename, handlePieceNameChange }) {
               <Typography fontSize={"1vw"} align="center" sx={{ color: 'white' }}>Traits</Typography>
               {rehydratedPiece.traits.length > 0 ?
                 (rehydratedPiece.traits.map((trait, index) => (
-                  <Chip label={numToTrait(trait)} key={index} color='primary' sx={{ fontSize: '.75vw' }} size='small' />
+                  <Chip label={strToTrait(trait)} key={index} color='primary' sx={{ fontSize: '.75vw' }} size='small' />
                 ))) : <Typography fontSize={".75vw"} align="center" sx={{ color: 'white' }}>None</Typography>}
             </div>
             <div className='status-effect-display'>

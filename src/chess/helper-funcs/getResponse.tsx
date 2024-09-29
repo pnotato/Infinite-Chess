@@ -2,8 +2,8 @@ import OpenAI from "openai";
 
 async function getResponse(inputString: string) {
     const openai = new OpenAI({
-        apiKey: "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",
-        dangerouslyAllowBrowser: true
+        apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+        dangerouslyAllowBrowser: true,
     });
 
     const prompt = `

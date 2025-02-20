@@ -3,7 +3,6 @@
     /* CHANGE THIS LATER */
     grid-template-columns: repeat(8, 100px);
     grid-template-rows: repeat(8, 100px);
-    background-color: red;
     /* CHANGE THIS LATER */
     width: 800px; 
     /* VARIABLE AFFECTED BY PIECE SIZE */

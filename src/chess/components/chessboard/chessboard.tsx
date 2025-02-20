@@ -1,192 +1,31 @@
 import { act, useRef, useEffect, useState } from 'react';
 import Tile from '../tile/tile.tsx';
 import './chessboard.css'
-import Referee from '../referee/referee.ts';
+import socket from '../../socket.js';
 import React from 'react';
+import { defaultPieceDef, defaultPieceDefBlack } from './defaultPieces.tsx';
+import { DefaultPieceType } from "../../enums/PieceType.tsx";
 
 const verticalAxis = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-interface Piece {
+export interface Piece {
     image: string
     x: number
     y: number
-    type: PieceType
-    team: TeamType
-}
-
-export enum PieceType {
-    PAWN,
-    BISHOP,
-    KNIGHT,
-    ROOK,
-    QUEEN,
-    KING
-}
-
-export enum TeamType {
-    OPPONENT,
-    OUR
+    type: string | DefaultPieceType
 }
 
 const initialBoardState: Piece[] = []
+defaultPieceDef(initialBoardState)
 
-// ----- PIECE DEFINITIONS ----- //
-
-// PAWN
-
-for (let i = 0; i < 8; i++) {
-    initialBoardState.push({
-        image: "constantpieces/pawn_w.png",
-        x: i,
-        y: 1,
-        type: PieceType.PAWN,
-        team: TeamType.OUR
-    })
-    initialBoardState.push({
-        image: "constantpieces/pawn_b.png",
-        x: i,
-        y: 6,
-        type: PieceType.PAWN,
-        team: TeamType.OPPONENT
-    })
-}
-
-// ROOK
-initialBoardState.push({
-    image: "constantpieces/rook_b.png",
-    x: 0,
-    y: 7,
-    type: PieceType.ROOK,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/rook_b.png",
-    x: 7,
-    y: 7,
-    type: PieceType.ROOK,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/rook_w.png",
-    x: 7,
-    y: 0,
-    type: PieceType.ROOK,
-    team: TeamType.OUR
-})
-initialBoardState.push({
-    image: "constantpieces/rook_w.png",
-    x: 0,
-    y: 0,
-    type: PieceType.ROOK,
-    team: TeamType.OUR
-})
-
-
-// KNIGHT
-
-initialBoardState.push({
-    image: "constantpieces/knight_b.png",
-    x: 1,
-    y: 7,
-    type: PieceType.KNIGHT,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/knight_b.png",
-    x: 6,
-    y: 7,
-    type: PieceType.KNIGHT,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/knight_w.png",
-    x: 1,
-    y: 0,
-    type: PieceType.KNIGHT,
-    team: TeamType.OUR
-})
-initialBoardState.push({
-    image: "constantpieces/knight_w.png",
-    x: 6,
-    y: 0,
-    type: PieceType.KNIGHT,
-    team: TeamType.OUR
-})
-
-// BISHOP
-
-initialBoardState.push({
-    image: "constantpieces/bishop_b.png",
-    x: 2,
-    y: 7,
-    type: PieceType.BISHOP,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/bishop_b.png",
-    x: 5,
-    y: 7,
-    type: PieceType.BISHOP,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/bishop_w.png",
-    x: 2,
-    y: 0,
-    type: PieceType.BISHOP,
-    team: TeamType.OUR
-})
-initialBoardState.push({
-    image: "constantpieces/bishop_w.png",
-    x: 5,
-    y: 0,
-    type: PieceType.BISHOP,
-    team: TeamType.OUR
-})
-
-// KING & QUEEN
-
-initialBoardState.push({
-    image: "constantpieces/queen_b.png",
-    x: 3,
-    y: 7,
-    type: PieceType.QUEEN,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/king_b.png",
-    x: 4,
-    y: 7,
-    type: PieceType.KING,
-    team: TeamType.OPPONENT
-})
-initialBoardState.push({
-    image: "constantpieces/queen_w.png",
-    x: 3,
-    y: 0,
-    type: PieceType.QUEEN,
-    team: TeamType.OUR
-})
-initialBoardState.push({
-    image: "constantpieces/king_w.png",
-    x: 4,
-    y: 0,
-    type: PieceType.KING,
-    team: TeamType.OUR
-})
-
-// ----- END PIECE DEFINITIONS ----- //
-
-
-export default function Chessboard() {
+export default function Chessboard(roomCode, username) {
     const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
     const [gridX, setGridX] = useState(0);
     const [gridY, setGridY] = useState(0);
 
     const [pieces, setPieces] = useState<Piece[]>(initialBoardState);
     const chessboardRef = useRef<HTMLElement>(null);
-    const referee = new Referee();
 
     // let activePiece: HTMLElement | null = null;
 
@@ -259,7 +98,6 @@ export default function Chessboard() {
             setPieces((value) => {
                 const pieces = value.map(p => {
                     if (p.x === gridX && p.y === gridY) {
-                        // referee.isValidMove(gridX, gridY, x, y, p.type, p.team);
                         p.x = x;
                         p.y = y;
                     }

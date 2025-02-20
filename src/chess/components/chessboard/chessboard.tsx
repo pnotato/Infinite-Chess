@@ -19,7 +19,18 @@ export interface Piece {
 const initialBoardState: Piece[] = []
 defaultPieceDef(initialBoardState)
 
-export default function Chessboard(roomCode, username) {
+export default function Chessboard(roomCode, username, player) {
+
+     const [roomInfo, setRoomInfo] = useState(null);
+     const [CurrentTurn, setCurrentTurn] = useState('WHITE');
+
+     const toggleTurn = () => {
+        setCurrentTurn(prevTurn => prevTurn === 'WHITE' ? 'BLACK' : 'WHITE');
+        console.log(CurrentTurn)
+      };
+
+    // Piece Positioning
+
     const [activePiece, setActivePiece] = useState<HTMLElement | null>(null);
     const [gridX, setGridX] = useState(0);
     const [gridY, setGridY] = useState(0);
@@ -103,7 +114,9 @@ export default function Chessboard(roomCode, username) {
                     }
                     return p;
                 });
+                console.log(pieces)
                 return pieces;
+                
             });
             setActivePiece(null); // set back to null to refresh the pieces
             activePiece.style.position = "";

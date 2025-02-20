@@ -1,0 +1,13 @@
+.animatedBackground{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background-color: #101010;
+    height: 100vh;
+    width: 100vw;
+    min-height: 800px; 
+    /* VARIABLE AFFECTED BY PIECE SIZE */
+}
+
+/* {{ position: "absolute", top: 0, left: 0, zIndex: -1, backgroundColor: '#101010', height: '100vh', minHeight: '800px' }} */

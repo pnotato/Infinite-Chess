@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import "./animatedBackground.css"
 
 const AnimatedBackground = () => {
   const canvasRef = useRef(null);
@@ -102,7 +103,8 @@ const AnimatedBackground = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, zIndex: -1, backgroundColor: '#101010' }} />;
+  return <canvas ref={canvasRef} className="animatedBackground"/>;
+  // might need to change later, minheight for the board.
 };
 
 export default AnimatedBackground;

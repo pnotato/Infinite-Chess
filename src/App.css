@@ -1,5 +1,12 @@
+#root {
+    display: grid;
+    place-content: center;
+    height: 100vh;
+}
+
 .App {
   text-align: center;
+  
 }
 
 .App-logo {
